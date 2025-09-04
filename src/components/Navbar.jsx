@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Calendar, Camera, User, Menu, X, Home, List } from 'lucide-react';
+import { scrollToTop } from '../utils/scrollToTop';
 import collegeLogo from '../pages/assets/icon.jpg';
 
 export default function Navbar() {
@@ -8,6 +9,11 @@ export default function Navbar() {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+
+  const handleNavClick = () => {
+    // Scroll to top when navigation link is clicked
+    scrollToTop();
+  };
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
@@ -24,6 +30,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link 
             to="/" 
+            onClick={handleNavClick}
             className="flex items-center gap-3 text-2xl font-bold text-primary-green hover:opacity-80 transition-opacity"
           >
             <div className="w-8 h-8 rounded-full overflow-hidden bg-white p-1 shadow-md">
@@ -42,6 +49,7 @@ export default function Navbar() {
               <Link
                 key={path}
                 to={path}
+                onClick={handleNavClick}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   isActive(path)
                     ? 'bg-primary-green text-white shadow-md'
@@ -76,7 +84,10 @@ export default function Navbar() {
                 <Link
                   key={path}
                   to={path}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleNavClick();
+                  }}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
                     isActive(path)
                       ? 'bg-primary-green text-white shadow-md'

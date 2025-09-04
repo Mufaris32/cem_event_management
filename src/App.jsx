@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTopButton from './components/ScrollToTopButton';
 import NotFound from './pages/NotFound';
 
 // Component to handle route changes and cleanup
@@ -18,6 +19,9 @@ function RouteChangeHandler() {
   const location = useLocation();
 
   useEffect(() => {
+    // Scroll to top on route change - immediate scroll for better UX
+    window.scrollTo(0, 0);
+
     // Clean up any remaining tooltips on route change
     const tooltips = document.querySelectorAll('.fc-tooltip');
     tooltips.forEach(tooltip => {
@@ -25,7 +29,7 @@ function RouteChangeHandler() {
         tooltip.parentNode.removeChild(tooltip);
       }
     });
-  }, [location]);
+  }, [location.pathname]); // Only trigger on pathname change
 
   return null;
 }
@@ -60,6 +64,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <ScrollToTopButton />
     </Router>
   );
 }

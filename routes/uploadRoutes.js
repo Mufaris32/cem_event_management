@@ -223,7 +223,7 @@ router.post('/gallery/multiple', async (req, res) => {
 
     try {
       // Import the function dynamically to avoid client-side issues
-      const { getImagesFromFolder } = await import('../src/services/imageService.js');
+      const { getImagesFromFolder } = await import('../src/services/imageServiceServer.js');
       const eventImages = {};
       
       await Promise.all(

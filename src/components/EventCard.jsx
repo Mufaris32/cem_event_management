@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Clock, Eye, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { scrollToTop } from '../utils/scrollToTop';
 
 const EventCard = ({ event, onClick, showViewMore = true }) => {
   const formatDate = (dateString) => {
@@ -131,7 +132,7 @@ const EventCard = ({ event, onClick, showViewMore = true }) => {
 
         {/* Action Button */}
         {showViewMore && (
-          <Link to={`/events/${event._id || event.id}`}>
+          <Link to={`/events/${event._id || event.id}`} onClick={scrollToTop}>
             <motion.button
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
