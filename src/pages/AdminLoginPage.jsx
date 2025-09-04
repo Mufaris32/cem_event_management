@@ -140,7 +140,7 @@ export default function AdminLoginPage() {
               </p>
               <div className="text-sm font-mono bg-white p-2 rounded border">
                 <div>Username: <span className="font-semibold">admin</span></div>
-                <div>Password: <span className="font-semibold">admin123</span></div>
+                <div>Password: <span className="font-semibold">admin@123</span></div>
               </div>
             </div>
           </div>

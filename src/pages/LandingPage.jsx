@@ -376,35 +376,7 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 px-4">
-            {stats.map((stat, index) => (
-              <div 
-                key={index} 
-                className="text-center p-4 sm:p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                onMouseEnter={(e) => {
-                  gsap.to(e.target, {
-                    y: -10,
-                    scale: 1.05,
-                    duration: 0.3,
-                    ease: "power2.out"
-                  });
-                }}
-                onMouseLeave={(e) => {
-                  gsap.to(e.target, {
-                    y: 0,
-                    scale: 1,
-                    duration: 0.3,
-                    ease: "power2.out"
-                  });
-                }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-primary-green mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-xs sm:text-sm text-muted font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+        
         </div>
       </section>
 

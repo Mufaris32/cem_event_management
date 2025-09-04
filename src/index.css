@@ -1,13 +1,14 @@
+
+@import './styles/globals.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Import FullCalendar styles */
-@import '@fullcalendar/core/main.css';
-@import '@fullcalendar/daygrid/main.css';
-
-/* Import additional styles */
 @import './styles/globals.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 /* Custom CSS Variables for our design system */
 :root {
