@@ -175,15 +175,21 @@ router.get('/gallery/:eventName', async (req, res) => {
     }
 
     try {
-      // Use the imported function
+      // Use the imported function with pagination for better performance
       const folderPath = `events/${eventName}`;
       const images = await getImagesFromFolder(folderPath);
+
+      // Sort images by creation date (newest first) and limit to reasonable number
+      const sortedImages = images
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 50); // Limit to 50 images per event for performance
 
       res.status(200).json({
         success: true,
         message: 'Images retrieved successfully',
         eventName,
-        images
+        images: sortedImages,
+        totalCount: images.length
       });
     } catch (cloudinaryError) {
       console.warn(`No images found for event: ${eventName}`, cloudinaryError);
@@ -193,7 +199,8 @@ router.get('/gallery/:eventName', async (req, res) => {
         success: true,
         message: 'No images found for this event',
         eventName,
-        images: []
+        images: [],
+        totalCount: 0
       });
     }
   } catch (error) {

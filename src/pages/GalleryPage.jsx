@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Search, ChevronDown, ChevronUp, Image, RefreshCw, Calendar } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import LazyImage from '../components/LazyImage';
 import { getPastEvents } from '../services/eventServiceClient';
-import { getMultipleEventImages, sanitizeEventName, getThumbnailUrl, getLargeImageUrl } from '../services/galleryService';
+import { getEventImages, sanitizeEventName, getThumbnailUrl, getLargeImageUrl } from '../services/galleryService';
 
 const GalleryPage = () => {
   const [pastEvents, setPastEvents] = useState([]);
@@ -15,17 +16,21 @@ const GalleryPage = () => {
   const [expandedEvents, setExpandedEvents] = useState(new Set());
   const [selectedImage, setSelectedImage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(new Set());
+
+  // Cache for loaded images to avoid re-fetching
+  const imageCache = useMemo(() => new Map(), []);
 
   useEffect(() => {
-    loadPastEventsAndImages();
+    loadPastEvents();
   }, []);
 
-  const loadPastEventsAndImages = async () => {
+  const loadPastEvents = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Get past events
+      // Get past events only - don't load images immediately
       const events = await getPastEvents();
       
       // Ensure we have an array and add proper ID fields
@@ -37,18 +42,6 @@ const GalleryPage = () => {
       setPastEvents(processedEvents);
       setFilteredEvents(processedEvents);
 
-      // Get images for each past event
-      if (processedEvents.length > 0) {
-        const eventNames = processedEvents.map(event => sanitizeEventName(event.title));
-        
-        try {
-          const images = await getMultipleEventImages(eventNames);
-          setEventImages(images);
-        } catch (imageError) {
-          console.warn('Could not load images from Cloudinary:', imageError);
-          setEventImages({});
-        }
-      }
     } catch (err) {
       console.error('Error loading past events:', err);
       setError('Failed to load past events. Please try again.');
@@ -56,6 +49,53 @@ const GalleryPage = () => {
       setLoading(false);
     }
   };
+
+  // Load images only when event is expanded (lazy loading)
+  const loadEventImages = useCallback(async (eventTitle) => {
+    const folderName = sanitizeEventName(eventTitle);
+    
+    // Check cache first
+    if (imageCache.has(folderName)) {
+      setEventImages(prev => ({
+        ...prev,
+        [folderName]: imageCache.get(folderName)
+      }));
+      return;
+    }
+
+    // Skip if already loading
+    if (loadingImages.has(folderName)) {
+      return;
+    }
+
+    try {
+      setLoadingImages(prev => new Set(prev).add(folderName));
+      
+      const images = await getEventImages(folderName);
+      
+      // Cache the result
+      imageCache.set(folderName, images);
+      
+      setEventImages(prev => ({
+        ...prev,
+        [folderName]: images
+      }));
+    } catch (error) {
+      console.warn(`Could not load images for ${eventTitle}:`, error);
+      // Cache empty result to avoid retrying
+      imageCache.set(folderName, []);
+      setEventImages(prev => ({
+        ...prev,
+        [folderName]: []
+      }));
+    } finally {
+      setLoadingImages(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(folderName);
+        return newSet;
+      });
+    }
+  }, [imageCache, loadingImages]);
 
   const handleSearch = (query) => {
     if (!query.trim()) {
@@ -72,15 +112,17 @@ const GalleryPage = () => {
     setFilteredEvents(filtered);
   };
 
-  const toggleEventExpansion = (eventId) => {
+  const toggleEventExpansion = useCallback((eventId, eventTitle) => {
     const newExpanded = new Set(expandedEvents);
     if (newExpanded.has(eventId)) {
       newExpanded.delete(eventId);
     } else {
       newExpanded.add(eventId);
+      // Load images when expanding event
+      loadEventImages(eventTitle);
     }
     setExpandedEvents(newExpanded);
-  };
+  }, [expandedEvents, loadEventImages]);
 
   const openImageModal = (image, eventTitle) => {
     setSelectedImage({ ...image, eventTitle });
@@ -135,7 +177,7 @@ const GalleryPage = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Error Loading Gallery</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={loadPastEventsAndImages}
+            onClick={loadPastEvents}
             className="flex items-center gap-2 mx-auto px-6 py-3 bg-college-primary text-white rounded-xl hover:bg-college-primary/90 transition-colors font-medium"
           >
             <RefreshCw className="w-5 h-5" />
@@ -165,6 +207,22 @@ const GalleryPage = () => {
               <Camera className="w-8 h-8 text-white" />
             </motion.div>
             <h1 className="heading-1 text-college-primary mb-0 font-serif">Event Gallery</h1>
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => {
+                // Clear cache and reload
+                imageCache.clear();
+                setEventImages({});
+                setExpandedEvents(new Set());
+                loadPastEvents();
+              }}
+              className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 group"
+              title="Refresh Gallery"
+            >
+              <RefreshCw className="w-5 h-5 text-college-primary group-hover:rotate-180 transition-transform duration-500" />
+            </motion.button>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-light">
             Relive the amazing moments from our past events. Browse through photos organized by each event 
@@ -258,7 +316,7 @@ const GalleryPage = () => {
                         </div>
                         
                         <button
-                          onClick={() => toggleEventExpansion(event.id)}
+                          onClick={() => toggleEventExpansion(event.id, event.title)}
                           className="ml-4 p-3 bg-college-primary/10 hover:bg-college-primary/20 rounded-xl transition-colors"
                         >
                           {isExpanded ? (
@@ -280,7 +338,12 @@ const GalleryPage = () => {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
-                          {images.length > 0 ? (
+                          {loadingImages.has(folderName) ? (
+                            <div className="p-6 text-center">
+                              <LoadingSpinner size="medium" />
+                              <p className="text-gray-500 mt-2">Loading photos...</p>
+                            </div>
+                          ) : images.length > 0 ? (
                             <div className="p-6">
                               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {images.map((image, imgIndex) => (
@@ -289,14 +352,13 @@ const GalleryPage = () => {
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: imgIndex * 0.05 }}
-                                    className="aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300"
-                                    onClick={() => openImageModal(image, event.title)}
+                                    className="aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 relative"
                                   >
-                                    <img
+                                    <LazyImage
                                       src={getThumbnailUrl(image.url)}
                                       alt={`${event.title} - Photo ${imgIndex + 1}`}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                      loading="lazy"
+                                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                      onClick={() => openImageModal(image, event.title)}
                                     />
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">

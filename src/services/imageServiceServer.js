@@ -77,15 +77,20 @@ export const deleteImage = async (publicId) => {
 /**
  * Get images from a specific Cloudinary folder (Server-side)
  * @param {string} folderPath - Cloudinary folder path
+ * @param {number} maxResults - Maximum number of images to fetch
  * @returns {Promise<Object[]>} - Array of image objects
  */
-export const getImagesFromFolder = async (folderPath) => {
+export const getImagesFromFolder = async (folderPath, maxResults = 100) => {
   try {
     const result = await cloudinary.api.resources({
       type: 'upload',
       prefix: folderPath,
-      max_results: 500, // Adjust as needed
-      resource_type: 'image'
+      max_results: maxResults,
+      resource_type: 'image',
+      // Add caching headers and optimize the request
+      context: true,
+      tags: true,
+      sort_by: [['created_at', 'desc']] // Sort by newest first
     });
 
     return result.resources.map(image => ({
@@ -94,7 +99,9 @@ export const getImagesFromFolder = async (folderPath) => {
       width: image.width,
       height: image.height,
       format: image.format,
-      created_at: image.created_at
+      created_at: image.created_at,
+      // Add optimized thumbnail URL
+      thumbnailUrl: image.secure_url.replace('/upload/', '/upload/w_300,h_300,c_fill,q_auto/')
     }));
   } catch (error) {
     console.error('Error fetching images from folder:', error);
