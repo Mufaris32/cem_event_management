@@ -1,36 +1,70 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Search, ChevronDown, ChevronUp, Image, RefreshCw, Calendar } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import LazyImage from '../components/LazyImage';
+import EventGalleryManager from '../components/EventGalleryManager';
 import { getPastEvents } from '../services/eventServiceClient';
-import { getEventImages, sanitizeEventName, getThumbnailUrl, getLargeImageUrl } from '../services/galleryService';
+import { getEventGalleryImages, getMultipleEventGalleryCounts } from '../services/eventGalleryService';
+import { isAuthenticated } from '../utils/auth';
 
 const GalleryPage = () => {
   const [pastEvents, setPastEvents] = useState([]);
-  const [eventImages, setEventImages] = useState({});
+  const [eventGalleries, setEventGalleries] = useState({});
+  const [eventGalleryCounts, setEventGalleryCounts] = useState({}); // New state for counts
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedEvents, setExpandedEvents] = useState(new Set());
   const [selectedImage, setSelectedImage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loadingImages, setLoadingImages] = useState(new Set());
-
-  // Cache for loaded images to avoid re-fetching
-  const imageCache = useMemo(() => new Map(), []);
+  const [loadingGalleries, setLoadingGalleries] = useState(new Set());
+  const [loadingCounts, setLoadingCounts] = useState(false); // New loading state for counts
+  // Removed isAdmin and showUploadModal - Gallery is read-only
 
   useEffect(() => {
     loadPastEvents();
+    // Removed admin check - Gallery is read-only for everyone
   }, []);
+
+  // Load gallery counts for all events after events are loaded
+  useEffect(() => {
+    if (pastEvents.length > 0) {
+      loadGalleryCounts();
+    }
+  }, [pastEvents]);
+
+  const loadGalleryCounts = async () => {
+    try {
+      setLoadingCounts(true);
+      
+      // Get all event IDs
+      const eventIds = pastEvents.map(event => event.id);
+      
+      // Load gallery counts efficiently in batches
+      const counts = await getMultipleEventGalleryCounts(eventIds);
+      
+      setEventGalleryCounts(counts);
+    } catch (error) {
+      console.error('Error loading gallery counts:', error);
+      // Fallback to individual loading if batch fails
+      const fallbackCounts = {};
+      pastEvents.forEach(event => {
+        fallbackCounts[event.id] = 0;
+      });
+      setEventGalleryCounts(fallbackCounts);
+    } finally {
+      setLoadingCounts(false);
+    }
+  };
 
   const loadPastEvents = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Get past events only - don't load images immediately
+      // Get past events only
       const events = await getPastEvents();
       
       // Ensure we have an array and add proper ID fields
@@ -50,52 +84,36 @@ const GalleryPage = () => {
     }
   };
 
-  // Load images only when event is expanded (lazy loading)
-  const loadEventImages = useCallback(async (eventTitle) => {
-    const folderName = sanitizeEventName(eventTitle);
-    
-    // Check cache first
-    if (imageCache.has(folderName)) {
-      setEventImages(prev => ({
-        ...prev,
-        [folderName]: imageCache.get(folderName)
-      }));
-      return;
-    }
-
-    // Skip if already loading
-    if (loadingImages.has(folderName)) {
+  // Load gallery images only when event is expanded (lazy loading)
+  const loadEventGallery = useCallback(async (eventId) => {
+    // Skip if already loading or already loaded
+    if (loadingGalleries.has(eventId) || eventGalleries[eventId]) {
       return;
     }
 
     try {
-      setLoadingImages(prev => new Set(prev).add(folderName));
+      setLoadingGalleries(prev => new Set(prev).add(eventId));
       
-      const images = await getEventImages(folderName);
+      const images = await getEventGalleryImages(eventId);
       
-      // Cache the result
-      imageCache.set(folderName, images);
-      
-      setEventImages(prev => ({
+      setEventGalleries(prev => ({
         ...prev,
-        [folderName]: images
+        [eventId]: images
       }));
     } catch (error) {
-      console.warn(`Could not load images for ${eventTitle}:`, error);
-      // Cache empty result to avoid retrying
-      imageCache.set(folderName, []);
-      setEventImages(prev => ({
+      console.warn(`Could not load gallery for event ${eventId}:`, error);
+      setEventGalleries(prev => ({
         ...prev,
-        [folderName]: []
+        [eventId]: []
       }));
     } finally {
-      setLoadingImages(prev => {
+      setLoadingGalleries(prev => {
         const newSet = new Set(prev);
-        newSet.delete(folderName);
+        newSet.delete(eventId);
         return newSet;
       });
     }
-  }, [imageCache, loadingImages]);
+  }, [eventGalleries, loadingGalleries]);
 
   const handleSearch = (query) => {
     if (!query.trim()) {
@@ -112,17 +130,17 @@ const GalleryPage = () => {
     setFilteredEvents(filtered);
   };
 
-  const toggleEventExpansion = useCallback((eventId, eventTitle) => {
+  const toggleEventExpansion = useCallback((eventId) => {
     const newExpanded = new Set(expandedEvents);
     if (newExpanded.has(eventId)) {
       newExpanded.delete(eventId);
     } else {
       newExpanded.add(eventId);
-      // Load images when expanding event
-      loadEventImages(eventTitle);
+      // Load gallery images when expanding event
+      loadEventGallery(eventId);
     }
     setExpandedEvents(newExpanded);
-  }, [expandedEvents, loadEventImages]);
+  }, [expandedEvents, loadEventGallery]);
 
   const openImageModal = (image, eventTitle) => {
     setSelectedImage({ ...image, eventTitle });
@@ -134,6 +152,8 @@ const GalleryPage = () => {
     setIsModalOpen(false);
   };
 
+
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -141,10 +161,6 @@ const GalleryPage = () => {
       month: 'long',
       day: 'numeric'
     });
-  };
-
-  const getEventFolderName = (eventTitle) => {
-    return sanitizeEventName(eventTitle);
   };
 
   const getCategoryColor = (category) => {
@@ -212,9 +228,9 @@ const GalleryPage = () => {
               animate={{ scale: 1 }}
               transition={{ delay: 0.3 }}
               onClick={() => {
-                // Clear cache and reload
-                imageCache.clear();
-                setEventImages({});
+                // Clear galleries and reload
+                setEventGalleries({});
+                setEventGalleryCounts({}); // Clear counts too
                 setExpandedEvents(new Set());
                 loadPastEvents();
               }}
@@ -246,7 +262,13 @@ const GalleryPage = () => {
             placeholder="Search by event name, description, or category..."
           />
           <div className="mt-4 text-sm text-gray-600">
-            Showing {filteredEvents.length} past events with photo galleries
+            Showing {filteredEvents.length} past events
+            {!loadingCounts && Object.keys(eventGalleryCounts).length > 0 && (
+              <span className="ml-2">
+                • {Object.values(eventGalleryCounts).filter(count => count > 0).length} with photos
+                • {Object.values(eventGalleryCounts).reduce((sum, count) => sum + count, 0)} total photos
+              </span>
+            )}
           </div>
         </motion.div>
 
@@ -275,9 +297,10 @@ const GalleryPage = () => {
               className="space-y-6"
             >
               {filteredEvents.map((event, index) => {
-                const folderName = getEventFolderName(event.title);
-                const images = eventImages[folderName] || [];
+                const images = eventGalleries[event.id] || [];
+                const photoCount = eventGalleryCounts[event.id] ?? '...'; // Show count from state
                 const isExpanded = expandedEvents.has(event.id);
+                const isLoadingGallery = loadingGalleries.has(event.id);
 
                 return (
                   <motion.div
@@ -304,22 +327,51 @@ const GalleryPage = () => {
                           <p className="text-gray-600 text-sm">
                             {event.shortDescription || event.description}
                           </p>
-                          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <Image className="w-4 h-4" />
-                              <span>{images.length} photos</span>
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <Image className="w-4 h-4" />
+                                <span>
+                                  {loadingCounts ? (
+                                    <span className="inline-flex items-center gap-1">
+                                      <div className="w-3 h-3 border-2 border-gray-300 border-t-college-primary rounded-full animate-spin"></div>
+                                      Loading...
+                                    </span>
+                                  ) : photoCount === 0 ? (
+                                    <span className="text-gray-400">No photos yet</span>
+                                  ) : (
+                                    <span className="font-medium text-college-primary">
+                                      {photoCount} photo{photoCount !== 1 ? 's' : ''}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+                              {event.location && typeof event.location === 'object' && (
+                                <span>📍 {event.location.address}, {event.location.city}</span>
+                              )}
+                              {event.location && typeof event.location === 'string' && (
+                                <span>📍 {event.location}</span>
+                              )}
                             </div>
-                            {event.venue && (
-                              <span>📍 {event.venue}</span>
-                            )}
+                            
+                            {/* Admin Quick Add Photos Button - REMOVED */}
+                            {/* Gallery page should be read-only */}
                           </div>
                         </div>
                         
                         <button
-                          onClick={() => toggleEventExpansion(event.id, event.title)}
-                          className="ml-4 p-3 bg-college-primary/10 hover:bg-college-primary/20 rounded-xl transition-colors"
+                          onClick={() => toggleEventExpansion(event.id)}
+                          className={`ml-4 p-3 rounded-xl transition-colors ${
+                            photoCount > 0 
+                              ? 'bg-college-primary/10 hover:bg-college-primary/20' 
+                              : 'bg-gray-100 hover:bg-gray-200 cursor-default'
+                          }`}
+                          disabled={photoCount === 0 && !loadingCounts}
+                          title={photoCount === 0 ? 'No photos to display' : `${isExpanded ? 'Hide' : 'Show'} gallery`}
                         >
-                          {isExpanded ? (
+                          {photoCount === 0 && !loadingCounts ? (
+                            <Camera className="w-5 h-5 text-gray-400" />
+                          ) : isExpanded ? (
                             <ChevronUp className="w-5 h-5 text-college-primary" />
                           ) : (
                             <ChevronDown className="w-5 h-5 text-college-primary" />
@@ -328,7 +380,7 @@ const GalleryPage = () => {
                       </div>
                     </div>
 
-                    {/* Event Images */}
+                    {/* Event Gallery */}
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.div
@@ -338,48 +390,18 @@ const GalleryPage = () => {
                           transition={{ duration: 0.3 }}
                           className="overflow-hidden"
                         >
-                          {loadingImages.has(folderName) ? (
+                          {isLoadingGallery ? (
                             <div className="p-6 text-center">
                               <LoadingSpinner size="medium" />
                               <p className="text-gray-500 mt-2">Loading photos...</p>
                             </div>
-                          ) : images.length > 0 ? (
-                            <div className="p-6">
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                {images.map((image, imgIndex) => (
-                                  <motion.div
-                                    key={image.publicId}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: imgIndex * 0.05 }}
-                                    className="aspect-square bg-gray-100 rounded-xl overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300 relative"
-                                  >
-                                    <LazyImage
-                                      src={getThumbnailUrl(image.url)}
-                                      alt={`${event.title} - Photo ${imgIndex + 1}`}
-                                      className="w-full h-full group-hover:scale-105 transition-transform duration-300"
-                                      onClick={() => openImageModal(image, event.title)}
-                                    />
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                                          <Image className="w-4 h-4 text-gray-700" />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </motion.div>
-                                ))}
-                              </div>
-                            </div>
                           ) : (
-                            <div className="p-6 text-center">
-                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Camera className="w-8 h-8 text-gray-400" />
-                              </div>
-                              <p className="text-gray-500">No photos available for this event yet.</p>
-                              <p className="text-sm text-gray-400 mt-1">
-                                Photos should be uploaded to folder: events/{folderName}
-                              </p>
+                            <div className="p-6">
+                              <EventGalleryManager 
+                                eventId={event.id} 
+                                eventTitle={event.title}
+                                isAdmin={false}
+                              />
                             </div>
                           )}
                         </motion.div>
@@ -392,6 +414,8 @@ const GalleryPage = () => {
           )}
         </AnimatePresence>
       </div>
+
+
 
       {/* Image Modal */}
       <AnimatePresence>
@@ -411,7 +435,7 @@ const GalleryPage = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <img
-                src={getLargeImageUrl(selectedImage.url)}
+                src={selectedImage.url}
                 alt={`${selectedImage.eventTitle} - Photo`}
                 className="max-w-full max-h-full object-contain rounded-lg"
               />
@@ -423,6 +447,9 @@ const GalleryPage = () => {
               </button>
               <div className="absolute bottom-4 left-4 bg-black/50 text-white px-4 py-2 rounded-lg">
                 <h4 className="font-semibold">{selectedImage.eventTitle}</h4>
+                {selectedImage.caption && (
+                  <p className="text-sm opacity-90">{selectedImage.caption}</p>
+                )}
               </div>
             </motion.div>
           </motion.div>

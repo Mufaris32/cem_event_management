@@ -110,15 +110,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM received. Shutting down gracefully...');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed.');
-    process.exit(0);
-  });
-});
-
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 =================================`);

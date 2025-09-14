@@ -14,9 +14,12 @@ import {
   BarChart3,
   Eye,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Camera,
+  Upload
 } from 'lucide-react';
 import AdminEventForm from '../components/AdminEventForm';
+import EventGalleryManager from '../components/EventGalleryManager';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { 
   getAllEvents, 
@@ -27,6 +30,7 @@ import {
   getPastEvents
 } from '../services/eventServiceClient';
 import { logout } from '../utils/auth';
+import { isEventPast } from '../utils/eventUtils';
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState([]);
@@ -38,6 +42,7 @@ export default function AdminDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showGalleryModal, setShowGalleryModal] = useState(null); // Store event for gallery management
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -397,6 +402,27 @@ export default function AdminDashboard() {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => navigate(`/events/${event.id}`)}
+                            className="p-2 hover:bg-green-100 rounded-lg transition-colors"
+                            title="View event details and gallery"
+                          >
+                            <Eye className="w-4 h-4 text-green-600" />
+                          </motion.button>
+                          {/* Quick Gallery Management for Past Events */}
+                          {isEventPast(event) && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setShowGalleryModal(event)}
+                              className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                              title="Manage event gallery photos"
+                            >
+                              <Camera className="w-4 h-4 text-purple-600" />
+                            </motion.button>
+                          )}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => { setEditing(event); setShowForm(true); }}
                             className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
                             title="Edit event"
@@ -501,6 +527,27 @@ export default function AdminDashboard() {
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => navigate(`/events/${event.id}`)}
+                            className="p-2 hover:bg-green-100 rounded-lg transition-colors"
+                            title="View event details and gallery"
+                          >
+                            <Eye className="w-4 h-4 text-green-600" />
+                          </motion.button>
+                          {/* Quick Gallery Management for Past Events */}
+                          {isEventPast(event) && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => setShowGalleryModal(event)}
+                              className="p-2 hover:bg-purple-100 rounded-lg transition-colors"
+                              title="Manage event gallery photos"
+                            >
+                              <Camera className="w-4 h-4 text-purple-600" />
+                            </motion.button>
+                          )}
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => { setEditing(event); setShowForm(true); }}
                             className="p-2 hover:bg-blue-100 rounded-lg transition-colors"
                             title="Edit event"
@@ -547,6 +594,98 @@ export default function AdminDashboard() {
                 isLoading={submitting}
               />
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Gallery Management Modal */}
+      <AnimatePresence>
+        {showGalleryModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <Camera className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Gallery Management</h3>
+                      <p className="text-gray-600">{showGalleryModal.title}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowGalleryModal(null)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 mt-4 text-sm">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">
+                    {new Date(showGalleryModal.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                    Past Event
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <EventGalleryManager 
+                  eventId={showGalleryModal._id || showGalleryModal.id} 
+                  eventTitle={showGalleryModal.title}
+                  isAdmin={true}
+                  onGalleryUpdate={() => {
+                    // Optionally refresh data or show success message
+                    console.log(`Gallery updated for ${showGalleryModal.title}`);
+                    console.log(`Event ID used: ${showGalleryModal._id || showGalleryModal.id}`);
+                  }}
+                />
+              </div>
+
+              {/* Quick Actions Footer */}
+              <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    💡 <strong>Tip:</strong> You can also manage photos from the event details page
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setShowGalleryModal(null);
+                        navigate(`/events/${showGalleryModal.id}`);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      <Eye className="w-4 h-4" />
+                      View Event Details
+                    </button>
+                    <button
+                      onClick={() => setShowGalleryModal(null)}
+                      className="px-4 py-2 bg-college-primary text-white rounded-xl hover:bg-college-primary/90 transition-colors font-medium"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

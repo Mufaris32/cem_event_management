@@ -1,4 +1,5 @@
 import api from '../utils/api.js';
+import requestDeduplicator from '../utils/requestDeduplicator.js';
 
 /**
  * Upload image files to server
@@ -70,36 +71,40 @@ export const createEvent = async (eventData, imageFiles = []) => {
  * @returns {Promise<Array>} - Events array
  */
 export const getAllEvents = async (params = {}) => {
-  try {
-    const response = await api.get('/events', { params });
-    
-    // Handle different response structures
-    if (response.data.success) {
-      // If data is nested (data.data.events)
-      if (response.data.data && response.data.data.events) {
-        return response.data.data.events;
+  const cacheKey = `getAllEvents_${JSON.stringify(params)}`;
+  
+  return requestDeduplicator.deduplicate(cacheKey, async () => {
+    try {
+      const response = await api.get('/events', { params });
+      
+      // Handle different response structures
+      if (response.data.success) {
+        // If data is nested (data.data.events)
+        if (response.data.data && response.data.data.events) {
+          return response.data.data.events;
+        }
+        // If data is direct (data.data as array)
+        if (Array.isArray(response.data.data)) {
+          return response.data.data;
+        }
+        // If events is direct property
+        if (response.data.events) {
+          return response.data.events;
+        }
+        return [];
       }
-      // If data is direct (data.data as array)
-      if (Array.isArray(response.data.data)) {
-        return response.data.data;
+      
+      // Fallback for direct array responses
+      if (Array.isArray(response.data)) {
+        return response.data;
       }
-      // If events is direct property
-      if (response.data.events) {
-        return response.data.events;
-      }
+      
       return [];
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      throw new Error('Failed to fetch events');
     }
-    
-    // Fallback for direct array responses
-    if (Array.isArray(response.data)) {
-      return response.data;
-    }
-    
-    return [];
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    throw new Error('Failed to fetch events');
-  }
+  });
 };
 
 /**

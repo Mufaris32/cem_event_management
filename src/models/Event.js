@@ -96,6 +96,28 @@ const eventSchema = new mongoose.Schema({
       trim: true
     }
   }],
+  galleryImages: [{
+    url: {
+      type: String,
+      required: true
+    },
+    publicId: {
+      type: String,
+      required: true
+    },
+    caption: {
+      type: String,
+      trim: true
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    },
+    uploadedBy: {
+      type: String,
+      default: 'admin'
+    }
+  }],
   capacity: {
     type: Number,
     min: 1,
@@ -141,19 +163,58 @@ const eventSchema = new mongoose.Schema({
 eventSchema.virtual('daysUntilEvent').get(function() {
   const today = new Date();
   const eventDate = new Date(this.date);
+  
+  if (this.time) {
+    // Parse the time string (e.g., "10:00 AM", "2:30 PM")
+    const [time, period] = this.time.split(' ');
+    const [hours, minutes] = time.split(':');
+    let hour24 = parseInt(hours);
+    
+    // Convert to 24-hour format
+    if (period?.toLowerCase() === 'pm' && hour24 !== 12) {
+      hour24 += 12;
+    } else if (period?.toLowerCase() === 'am' && hour24 === 12) {
+      hour24 = 0;
+    }
+    
+    eventDate.setHours(hour24, parseInt(minutes) || 0, 0, 0);
+  } else {
+    // If no time specified, consider the event starts at beginning of the day
+    eventDate.setHours(0, 0, 0, 0);
+  }
+  
   const diffTime = eventDate - today;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return diffDays;
 });
 
-// Virtual for event status based on date
+// Virtual for event status based on date and time
 eventSchema.virtual('eventStatus').get(function() {
   const today = new Date();
   const eventDate = new Date(this.date);
   
+  if (this.time) {
+    // Parse the time string (e.g., "10:00 AM", "2:30 PM")
+    const [time, period] = this.time.split(' ');
+    const [hours, minutes] = time.split(':');
+    let hour24 = parseInt(hours);
+    
+    // Convert to 24-hour format
+    if (period?.toLowerCase() === 'pm' && hour24 !== 12) {
+      hour24 += 12;
+    } else if (period?.toLowerCase() === 'am' && hour24 === 12) {
+      hour24 = 0;
+    }
+    
+    eventDate.setHours(hour24, parseInt(minutes) || 0, 0, 0);
+  } else {
+    // If no time specified, consider the event starts at beginning of the day
+    eventDate.setHours(0, 0, 0, 0);
+  }
+  
   if (this.status === 'cancelled') return 'cancelled';
-  if (eventDate < today) return 'past';
-  if (eventDate.toDateString() === today.toDateString()) return 'today';
+  if (eventDate <= today) return 'past';
+  if (eventDate.toDateString() === today.toDateString() && Math.abs(eventDate - today) < 24 * 60 * 60 * 1000) return 'today';
   return 'upcoming';
 });
 

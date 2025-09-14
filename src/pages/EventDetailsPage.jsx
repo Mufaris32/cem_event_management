@@ -12,10 +12,14 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Camera,
+  Settings
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import EventGalleryManager from '../components/EventGalleryManager';
 import { getEventById } from '../services/eventServiceClient';
+import { isEventUpcoming, getEventDateTime } from '../utils/eventUtils';
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -24,6 +28,7 @@ export default function EventDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -98,24 +103,7 @@ export default function EventDetailsPage() {
   const generateGoogleCalendarUrl = () => {
     if (!event) return '';
 
-    const startDate = new Date(event.date);
-    // Set event time if available, otherwise default to 10:00 AM
-    if (event.time) {
-      const [time, period] = event.time.split(' ');
-      const [hours, minutes] = time.split(':');
-      let hour24 = parseInt(hours);
-      
-      if (period?.toLowerCase() === 'pm' && hour24 !== 12) {
-        hour24 += 12;
-      } else if (period?.toLowerCase() === 'am' && hour24 === 12) {
-        hour24 = 0;
-      }
-      
-      startDate.setHours(hour24, parseInt(minutes) || 0, 0, 0);
-    } else {
-      startDate.setHours(10, 0, 0, 0);
-    }
-
+    const startDate = getEventDateTime(event);
     // End time: 2 hours after start time
     const endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000));
 
@@ -184,7 +172,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const isUpcoming = new Date(event.date) > new Date();
+  const isUpcoming = isEventUpcoming(event);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-college-accent/20 via-white to-college-accent/10">
@@ -366,6 +354,72 @@ export default function EventDetailsPage() {
                     {event.description}
                   </p>
                 </div>
+              </div>
+            </motion.div>
+
+            {/* Event Gallery Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
+            >
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-college-primary/10 rounded-lg flex items-center justify-center">
+                      <Camera className="w-5 h-5 text-college-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 font-serif">Event Photos</h2>
+                      <p className="text-gray-600">
+                        {!isUpcoming ? 'Photos from this past event' : 'Photos will be available after the event'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Toggle Gallery View Button */}
+                  {!isUpcoming && (
+                    <button
+                      onClick={() => setShowGallery(!showGallery)}
+                      className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      <Camera className="w-4 h-4" />
+                      {showGallery ? 'Hide Photos' : 'View Photos'}
+                    </button>
+                  )}
+                </div>
+
+                <AnimatePresence>
+                  {showGallery && !isUpcoming && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <EventGalleryManager 
+                        eventId={id} 
+                        eventTitle={event.title}
+                        isAdmin={false}
+                        key={`gallery-${id}`} // Force re-render when event changes
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {!showGallery && (
+                  <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
+                    <Camera className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 font-medium mb-2">Event Photo Gallery</p>
+                    <p className="text-gray-400 text-sm">
+                      {!isUpcoming 
+                        ? 'Click "View Photos" to see photos from this event' 
+                        : 'Photos will be available after the event concludes'
+                      }
+                    </p>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

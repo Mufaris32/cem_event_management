@@ -1,4 +1,5 @@
 import axios from 'axios';
+import apiMonitor from './apiMonitor.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -9,13 +10,17 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for authentication
+// Request interceptor for authentication and monitoring
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log API call for monitoring
+    apiMonitor.logCall(config.url, config.method?.toUpperCase());
+    
     return config;
   },
   (error) => {
