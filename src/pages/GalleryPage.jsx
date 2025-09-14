@@ -3,11 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Search, ChevronDown, ChevronUp, Image, RefreshCw, Calendar } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import LoadingSpinner from '../components/LoadingSpinner';
-import LazyImage from '../components/LazyImage';
 import EventGalleryManager from '../components/EventGalleryManager';
 import { getPastEvents } from '../services/eventServiceClient';
 import { getEventGalleryImages, getMultipleEventGalleryCounts } from '../services/eventGalleryService';
-import { isAuthenticated } from '../utils/auth';
 
 const GalleryPage = () => {
   const [pastEvents, setPastEvents] = useState([]);

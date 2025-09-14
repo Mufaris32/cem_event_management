@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ImageView from './ImageView';
 
 const LazyImage = ({ 
   src, 
   alt, 
   className = '', 
-  onClick = null,
-  placeholder = 'https://via.placeholder.com/300x300/e5e5e5/999999?text=Loading...'
+  onClick = null
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [showImageView, setShowImageView] = useState(false);
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ const LazyImage = ({
       },
       {
         threshold: 0.1,
-        rootMargin: '50px 0px', // Start loading 50px before coming into view
+        rootMargin: '50px 0px'
       }
     );
 
@@ -47,39 +48,56 @@ const LazyImage = ({
     setIsLoaded(true);
   };
 
-  const imageSrc = hasError 
-    ? 'https://via.placeholder.com/300x300/e5e5e5/999999?text=Image+Not+Found'
-    : (isInView ? src : placeholder);
+  const handleImageClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setShowImageView(true);
+    }
+  };
+
+  const imageSrc = hasError ? null : (isInView ? src : null);
 
   return (
-    <div 
-      ref={imgRef} 
-      className={`relative overflow-hidden ${className}`}
-      onClick={onClick}
-    >
-      <img
-        src={imageSrc}
-        alt={alt}
-        className="w-full h-full object-cover transition-all duration-300"
-        onLoad={handleLoad}
-        onError={handleError}
-        style={{
-          filter: !isLoaded && isInView ? 'blur(5px)' : 'none',
-          transform: !isLoaded && isInView ? 'scale(1.1)' : 'scale(1)',
-        }}
+    <>
+      <div 
+        ref={imgRef} 
+        className={`relative overflow-hidden ${className}`}
+        onClick={handleImageClick}
+      >
+        {imageSrc && (
+          <img
+            src={imageSrc}
+            alt={alt}
+            className="w-full h-full object-cover cursor-pointer transition-all duration-300 hover:scale-105"
+            onLoad={handleLoad}
+            onError={handleError}
+            loading="lazy"
+          />
+        )}
+        
+        {!isLoaded && isInView && !hasError && (
+          <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
+        )}
+
+        {hasError && (
+          <div className="absolute inset-0 bg-gray-100 flex flex-col items-center justify-center text-gray-500">
+            <svg className="w-8 h-8 mb-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs">Failed to load</span>
+          </div>
+        )}
+      </div>
+
+      <ImageView 
+        image={src}
+        isOpen={showImageView}
+        onClose={() => setShowImageView(false)}
       />
-      
-      {!isLoaded && isInView && (
-        <motion.div 
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 0 }}
-          transition={{ delay: 2 }}
-          className="absolute inset-0 bg-gray-200 flex items-center justify-center"
-        >
-          <div className="w-8 h-8 border-4 border-gray-300 border-t-college-primary rounded-full animate-spin"></div>
-        </motion.div>
-      )}
-    </div>
+    </>
   );
 };
 

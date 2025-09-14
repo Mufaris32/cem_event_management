@@ -21,6 +21,7 @@ import {
   deleteEventGalleryImage,
   updateEventGalleryImageCaption
 } from '../services/eventGalleryService';
+import ImageView from './ImageView';
 
 export default function EventGalleryManager({ eventId, eventTitle, isAdmin = false }) {
   const [galleryImages, setGalleryImages] = useState([]);
@@ -237,7 +238,7 @@ export default function EventGalleryManager({ eventId, eventTitle, isAdmin = fal
                 transition={{ delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300"
               >
-                <div className="relative aspect-square">
+                <div className="relative aspect-square" onClick={() => <ImageView image={image.url} />}>
                   <LazyImage
                     src={image.url}
                     alt={image.caption || `Gallery image ${index + 1}`}
