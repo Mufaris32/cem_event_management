@@ -308,29 +308,22 @@ const EventsPage = () => {
                         <div className="w-full">
                           {isPastEvent && galleryImages.length > 0 ? (
                             /* Past Event - Show first gallery image as main cover */
-                            <div className="relative group cursor-pointer">
+                            <div className="relative cursor-default">
                               <LazyImage
                                 src={galleryImages[0].url}
                                 alt={`${event.title} - Event Photo`}
-                                className="w-full h-48 object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-48 object-cover rounded-xl cursor-default"
                               />
                               {/* Gallery indicator overlay */}
-                              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2 group-hover:bg-black/80 transition-colors">
+                              <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 flex items-center gap-2">
                                 <Camera className="w-4 h-4 text-white" />
                                 <span className="text-sm font-medium text-white">{galleryImages.length}</span>
                               </div>
                               {/* Gallery badge */}
-                              <div className="absolute bottom-3 left-3 bg-purple-600/90 backdrop-blur-sm rounded-lg px-3 py-1.5 group-hover:bg-purple-600 transition-colors">
+                              <div className="absolute bottom-3 left-3 bg-purple-600/90 backdrop-blur-sm rounded-lg px-3 py-1.5">
                                 <div className="flex items-center gap-2">
                                   <Image className="w-3 h-3 text-white" />
                                   <span className="text-xs font-medium text-white">Event Gallery</span>
-                                </div>
-                              </div>
-                              {/* Hover overlay */}
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-xl transition-colors duration-300 flex items-center justify-center">
-                                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
-                                  <Image className="w-8 h-8 mx-auto mb-2" />
-                                  <span className="text-sm font-medium">Click to view all photos</span>
                                 </div>
                               </div>
                             </div>
@@ -339,7 +332,7 @@ const EventsPage = () => {
                             <img
                               src={event.images[0]?.url || event.images[0]}
                               alt={event.title}
-                              className="w-full h-48 object-cover rounded-xl"
+                              className="w-full h-48 object-cover rounded-xl cursor-default"
                               onError={(e) => {
                                 e.target.src = 'https://via.placeholder.com/800x400/1B4D3E/FFFFFF?text=No+Image';
                               }}

@@ -42,9 +42,13 @@ const upload = multer({
 router.get('/', async (req, res) => {
   try {
     const result = await getAllEvents(req.query);
+    
+    // Extract events array from the result
+    const events = result.events || result;
+    
     res.status(200).json({
       success: true,
-      data: result
+      data: events
     });
   } catch (error) {
     console.error('Get events error:', error);
