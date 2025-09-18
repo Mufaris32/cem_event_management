@@ -201,17 +201,29 @@ const LandingPage = () => {
     {
       icon: Calendar,
       title: 'Event Calendar',
-      description: 'View and manage all upcoming events in one place'
+      description: [
+        'Comprehensive calendar system with detailed scheduling',
+        'Automated reminders and workflow integration',
+        'Never miss important college events again'
+      ]
     },
     {
       icon: Camera,
       title: 'Photo Gallery',
-      description: 'Browse through beautiful moments from past events'
+      description: [
+        'High-quality image collections from past events',
+        'Organized by events and categories for easy browsing',
+        'Share precious moments with college community'
+      ]
     },
     {
       icon: Users,
       title: 'Easy Management',
-      description: 'Streamlined admin dashboard for event organization'
+      description: [
+        'Streamlined admin dashboard for event organization',
+        'Manage registrations and track attendance easily',
+        'Focus on experiences rather than administrative tasks'
+      ]
     }
   ];
 
@@ -528,9 +540,9 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="section-padding-sm bg-gray-50">
+      <section className="py-6 bg-gray-50">
         <div className="container px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 px-4">
+          <div className="text-center mb-8 px-4">
             <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-6">
               Why Choose Our Platform?
             </h2>
@@ -568,8 +580,15 @@ const LandingPage = () => {
                   <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-green to-primary-green-light rounded-xl flex items-center justify-center transform transition-transform duration-300 hover:rotate-12">
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted">{feature.description}</p>
+                  <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
+                  <ul className="text-left text-muted text-lg space-y-2">
+                    {feature.description.map((point, pointIndex) => (
+                      <li key={pointIndex} className="flex items-start">
+                        <span className="text-primary-green mr-2 mt-1">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
@@ -578,7 +597,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-primary-green to-primary-green-light">
+      <section className="py-6 bg-gradient-to-r from-primary-green to-primary-green-light">
         <div className="container text-center px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-white px-4">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6">

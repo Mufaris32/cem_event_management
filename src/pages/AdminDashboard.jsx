@@ -169,7 +169,6 @@ export default function AdminDashboard() {
       value: Array.isArray(events) ? events.length : 0,
       icon: Calendar,
       color: 'from-college-primary to-college-primary/80',
-      change: '+12%',
       description: 'All events'
     },
     {
@@ -177,7 +176,6 @@ export default function AdminDashboard() {
       value: Array.isArray(upcomingEvents) ? upcomingEvents.length : 0,
       icon: TrendingUp,
       color: 'from-college-secondary to-orange-400',
-      change: '+8%',
       description: 'Future events'
     },
     {
@@ -185,16 +183,7 @@ export default function AdminDashboard() {
       value: Array.isArray(pastEvents) ? pastEvents.length : 0,
       icon: Trophy,
       color: 'from-blue-500 to-blue-600',
-      change: '+23%',
       description: 'Completed events'
-    },
-    {
-      title: 'Success Rate',
-      value: '98%',
-      icon: BarChart3,
-      color: 'from-green-500 to-green-600',
-      change: '+2%',
-      description: 'Event completion'
     }
   ];
 
@@ -279,7 +268,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
         >
           {stats.map((stat, index) => (
             <motion.div
