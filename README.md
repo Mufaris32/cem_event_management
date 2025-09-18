@@ -1,313 +1,299 @@
 # 🎓 College Event Management System
 
-A comprehensive, responsive web application for managing and displaying college events with Firebase backend integration and classical, elegant design.
+A modern, responsive web application designed for Jaffna College of Education to manage and showcase college events with an elegant, user-friendly interface.
 
-## ✨ Features Overview
+## 📋 Table of Contents
+- [Features](#-features)
+- [Technology Stack](#️-technology-stack)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [Admin Features](#-admin-features)
+- [API Endpoints](#-api-endpoints)
+- [Screenshots](#-screenshots)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-### 🎨 Classical Design System
-- **Timeless Typography**: Elegant serif fonts for headings, clean sans-serif for body text
-- **Classical Color Palette**: Deep greens, warm golds, and cream tones
-- **Refined UI Elements**: Subtle shadows, elegant borders, and smooth transitions
-- **Premium Feel**: Sophisticated hover effects and animations
+## ✨ Features
 
-### 🔥 Firebase Integration
-- **Real-time Database**: Firestore for event storage and synchronization
-- **Image Storage**: Firebase Storage for event images with compression
-- **CRUD Operations**: Complete Create, Read, Update, Delete functionality
-- **Optimized Queries**: Efficient data fetching with caching
+### 🎯 Core Functionality
+- **Event Management**: Create, edit, delete, and organize college events
+- **Photo Gallery**: Upload and manage event photos with Cloudinary integration
+- **Calendar View**: Interactive calendar displaying all events with filtering
+- **Admin Dashboard**: Comprehensive admin panel with statistics and management tools
+- **Responsive Design**: Mobile-first design that works seamlessly on all devices
+- **Search & Filter**: Advanced search capabilities with category and date filtering
 
-### 📱 Responsive Design
-- **Mobile-First**: Optimized for all device sizes
-- **Touch-Friendly**: Large touch targets and intuitive navigation
-- **Fast Loading**: Optimized images and lazy loading
-- **Cross-Browser**: Compatible with all modern browsers
+### 🔧 Technical Features
+- **Real-time Updates**: Live data synchronization across all components
+- **Image Optimization**: Automatic image compression and resizing via Cloudinary
+- **Form Validation**: Comprehensive client-side and server-side validation
+- **Admin Authentication**: Secure admin login with session management
+- **Error Handling**: Graceful error handling with user-friendly messages
+- **Loading States**: Smooth loading animations and skeleton screens
 
-## 🏛️ Design Philosophy
-
-### Classical Elements
-- **Serif Typography**: Elegant headings with Georgia and Times New Roman fallbacks
-- **Sophisticated Colors**: 
-  - Deep Forest Green (`#1B4D3E`) for primary elements
-  - Warm Gold (`#FFD700`) for accents and highlights
-  - Soft Cream (`#E8F3E9`) for backgrounds
-  - Rich Text (`#333333`) for readability
-
-### Modern Interactions
-- **Smooth Animations**: Framer Motion for fluid transitions
-- **Hover Effects**: Subtle transforms and color changes
-- **Loading States**: Elegant spinners and skeleton screens
-- **Micro-interactions**: Delightful button and card animations
-
-## 🚀 Key Features
-
-### Event Management
-- ✅ **Admin Dashboard**: Comprehensive event management interface
-- ✅ **Image Upload**: Firebase Storage integration with validation
-- ✅ **Form Validation**: Real-time validation with helpful error messages
-- ✅ **Bulk Operations**: Efficient management of multiple events
-- ✅ **Statistics**: Event analytics and metrics
-
-### Event Display
-- ✅ **Gallery View**: Elegant grid layout with filtering
-- ✅ **Calendar Integration**: FullCalendar with custom styling
-- ✅ **Detailed Views**: Rich event pages with full information
-- ✅ **Search & Filter**: Advanced search with multiple criteria
-- ✅ **Quick View Modals**: Fast event previews without navigation
-
-### User Experience
-- ✅ **Loading Animations**: Beautiful loading states throughout
-- ✅ **Error Handling**: Graceful error messages and retry options
-- ✅ **Progressive Enhancement**: Works without JavaScript for basic functionality
-- ✅ **Accessibility**: ARIA labels and keyboard navigation
-- ✅ **SEO Optimized**: Proper meta tags and semantic HTML
-
-## �️ Technology Stack
+## 🛠️ Technology Stack
 
 ### Frontend
-- **React 18** - Latest React with Concurrent Features
-- **Vite** - Lightning-fast build tool and dev server
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Production-ready motion library
-- **React Router v6** - Declarative routing
+- **React 18** - Modern React with hooks and concurrent features
+- **Vite** - Lightning-fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework for rapid styling
+- **Framer Motion** - Smooth animations and page transitions
+- **React Router v6** - Declarative client-side routing
 
-### Backend & Storage
-- **Firebase Firestore** - NoSQL document database
-- **Firebase Storage** - File storage with CDN
-- **Firebase Auth** - Authentication (optional)
+### Backend
+- **Node.js** - JavaScript runtime environment
+- **Express.js** - Minimal and flexible web application framework
+- **MongoDB** - NoSQL document database
+- **Cloudinary** - Cloud-based image storage and optimization
 
-### UI Libraries
-- **Lucide React** - Beautiful, customizable icons
-- **FullCalendar** - Feature-rich calendar component
-- **React Photo View** - Lightbox for image viewing
+### Additional Libraries
+- **Lucide React** - Beautiful and customizable icon library
+- **FullCalendar** - Interactive calendar component with event management
+- **GSAP** - Professional-grade animation library
+- **Mongoose** - MongoDB object modeling for Node.js
 
-## 📁 Project Structure
-
-```
-src/
-├── components/           # Reusable UI components
-│   ├── AdminEventForm.jsx    # Event creation/editing form
-│   ├── EventCard.jsx         # Event display card
-│   ├── EventModal.jsx        # Quick view modal
-│   ├── LoadingSpinner.jsx    # Loading animation
-│   ├── Navbar.jsx            # Navigation component
-│   ├── SearchBar.jsx         # Search functionality
-│   └── ProtectedRoute.jsx    # Route protection
-├── firebase/            # Firebase configuration
-│   ├── config.js            # Firebase setup
-│   └── eventService.js      # Event CRUD operations
-├── pages/               # Main application pages
-│   ├── AdminDashboard.jsx   # Admin interface
-│   ├── AdminLoginPage.jsx   # Admin authentication
-│   ├── CalendarPage.jsx     # Calendar view
-│   ├── EventDetailsPage.jsx # Individual event details
-│   ├── GalleryPage.jsx      # Event gallery
-│   ├── LandingPage.jsx      # Homepage
-│   └── NotFound.jsx         # 404 page
-├── styles/              # Global styles
-│   └── globals.css          # Design system
-├── utils/               # Utility functions
-│   ├── auth.js              # Authentication helpers
-│   ├── api.js               # API utilities
-│   └── dummyData.js         # Sample data
-└── images/              # Static assets
-```
-
-## 🔧 Setup & Installation
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+ 
-- npm or yarn
-- Firebase project (see FIREBASE_SETUP.md)
+- Node.js (v16 or higher)
+- MongoDB (local or cloud instance)
+- Cloudinary account for image management
 
-### Quick Start
-1. **Clone & Install**
+### Installation
+
+1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd cem_event_management-
+   git clone https://github.com/Mufaris32/cem_event_management.git
+   cd cem_event_management
+   ```
+
+2. **Install dependencies**
+   ```bash
    npm install
    ```
 
-2. **Configure Firebase**
-   - Follow instructions in `FIREBASE_SETUP.md`
-   - Update `src/firebase/config.js` with your Firebase config
-
-3. **Start Development**
-   ```bash
-   npm run dev
+3. **Environment Setup**
+   Create a `.env` file in the root directory:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=your_cloudinary_api_key
+   CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+   PORT=5000
    ```
 
-4. **Build for Production**
+4. **Initialize Database**
+   ```bash
+   node scripts/init-database.js
+   ```
+
+5. **Start Development Server**
+   ```bash
+   # Start both frontend and backend
+   npm run dev
+   
+   # Or start separately
+   npm run server  # Backend on port 5000
+   npm run client  # Frontend on port 5173
+   ```
+
+6. **Build for Production**
    ```bash
    npm run build
    ```
 
-## 🎯 Page Features
+## 📁 Project Structure
 
-### 🏠 Landing Page (`/`)
-- Hero section with elegant typography
-- Feature highlights with icons
-- Call-to-action sections
-- Responsive image galleries
-
-### 📅 Calendar Page (`/calendar`)
-- Interactive FullCalendar with custom styling
-- Advanced filtering by category and search
-- Event click navigation
-- Mobile-optimized calendar view
-- Quick statistics cards
-
-### 🖼️ Gallery Page (`/gallery`)
-- Elegant masonry-style grid
-- Real-time search and filtering
-- Year and category filters
-- Hover effects with smooth transitions
-- Quick view modals for events
-
-### 📄 Event Details (`/events/:id`)
-- Comprehensive event information
-- Large hero images
-- Elegant typography and layout
-- Social sharing capabilities
-- Related events suggestions
-
-### 👨‍💼 Admin Dashboard (`/admin/dashboard`)
-- Modern admin interface with statistics
-- Event management with inline editing
-- Bulk operations and analytics
-- Image upload with preview
-- Real-time data updates
-
-## 🔒 Authentication & Security
-
-### Admin Authentication
-- Simple username/password system
-- Session management with localStorage
-- Protected routes for admin features
-- Logout functionality
-
-### Firebase Security
-- Firestore security rules for data protection
-- Storage rules for image uploads
-- Input validation and sanitization
-- XSS protection with React
-
-## 📱 Responsive Design
-
-### Breakpoints
-- **Mobile**: < 640px
-- **Tablet**: 640px - 1024px
-- **Desktop**: > 1024px
-
-### Mobile Optimizations
-- Touch-friendly buttons and navigation
-- Optimized image loading
-- Simplified layouts for small screens
-- Swipe gestures for modals
-
-## 🎨 Customization
-
-### Design System
-Update the color scheme in `tailwind.config.js`:
-```javascript
-colors: {
-  college: {
-    primary: '#1B4D3E',    // Dark green
-    secondary: '#FFD700',   // Gold
-    accent: '#E8F3E9',     // Light green
-    // Add your custom colors
-  }
-}
+```
+cem_event_management/
+├── 📁 src/                     # Frontend source code
+│   ├── 📁 components/          # Reusable React components
+│   │   ├── AdminEventForm.jsx  # Event creation/editing form
+│   │   ├── EventCard.jsx       # Event display card
+│   │   ├── Gallery.jsx         # Photo gallery component
+│   │   ├── LoadingSpinner.jsx  # Loading animation
+│   │   └── Navbar.jsx          # Navigation component
+│   ├── 📁 pages/               # Main application pages
+│   │   ├── AdminDashboard.jsx  # Admin management interface
+│   │   ├── CalendarPage.jsx    # Interactive calendar view
+│   │   ├── EventsPage.jsx      # Events listing page
+│   │   ├── GalleryPage.jsx     # Photo gallery page
+│   │   └── LandingPage.jsx     # Homepage
+│   ├── 📁 services/            # API service functions
+│   ├── 📁 styles/              # Global CSS styles
+│   └── 📁 utils/               # Utility functions
+├── 📁 routes/                  # Backend API routes
+├── 📁 models/                  # Database models
+├── 📁 config/                  # Configuration files
+├── server.js                   # Express server entry point
+├── vite.config.mjs            # Vite configuration
+└── package.json               # Project dependencies
 ```
 
-### Adding New Event Categories
-1. Update the categories array in components
-2. Add corresponding colors in the design system
-3. Update Firebase queries if needed
+## 👨‍💼 Admin Features
 
-### Custom Styling
-- Modify `src/styles/globals.css` for global styles
-- Use Tailwind classes for component-specific styling
-- Add custom animations with Framer Motion
+### Dashboard Overview
+- **Event Statistics**: Total, upcoming, and past events count
+- **Quick Actions**: Add new event, manage carousel
+- **Recent Events**: List of recently created events with management options
 
-## 🚀 Performance Optimization
+### Event Management
+- **Create Events**: Rich form with image upload and validation
+- **Edit Events**: Inline editing with real-time updates
+- **Delete Events**: Confirmation dialog for safe deletion
+- **Bulk Operations**: Manage multiple events efficiently
 
-- **Code Splitting**: Route-based lazy loading
-- **Image Optimization**: WebP format with fallbacks
-- **Caching**: Firebase caching for faster loads
-- **Bundle Analysis**: Webpack bundle analyzer integration
-- **SEO**: Meta tags and structured data
+### Gallery Management
+- **Photo Upload**: Drag-and-drop image upload for past events
+- **Image Organization**: Organize photos by event categories
+- **Photo Editing**: Basic editing tools and caption management
 
-## � Event Data Structure
+### Authentication
+- **Secure Login**: Admin authentication with session management
+- **Protected Routes**: Access control for admin-only features
+- **Auto Logout**: Session timeout for security
 
-```javascript
-{
-  id: "auto-generated",
-  title: "Event Name",
-  date: "YYYY-MM-DD",
-  time: "HH:MM", // optional
-  location: "Event Location", // optional
-  category: "Cultural|Sports|Workshop|Seminar|Conference|Competition",
-  shortDescription: "Brief description (max 150 chars)",
-  description: "Full event description",
-  imageUrl: "Firebase Storage URL",
-  createdAt: "Firestore Timestamp",
-  updatedAt: "Firestore Timestamp"
-}
+## 🔌 API Endpoints
+
+### Events
+```http
+GET    /api/events              # Get all events
+GET    /api/events/upcoming     # Get upcoming events
+GET    /api/events/past         # Get past events
+GET    /api/events/:id          # Get specific event
+POST   /api/events              # Create new event
+PUT    /api/events/:id          # Update event
+DELETE /api/events/:id          # Delete event
 ```
 
-## 🔄 Firebase Operations
-
-### Creating Events
-```javascript
-import { createEvent } from './firebase/eventService';
-
-const newEvent = await createEvent(eventData, imageFile);
+### Gallery
+```http
+GET    /api/gallery/:eventId    # Get event photos
+POST   /api/gallery/:eventId    # Upload photos
+DELETE /api/gallery/:photoId    # Delete photo
 ```
 
-### Fetching Events
-```javascript
-import { getAllEvents, getUpcomingEvents } from './firebase/eventService';
-
-const events = await getAllEvents();
-const upcoming = await getUpcomingEvents();
+### Carousel
+```http
+GET    /api/carousel             # Get carousel items
+POST   /api/carousel             # Create carousel item
+PUT    /api/carousel/:id         # Update carousel item
+DELETE /api/carousel/:id         # Delete carousel item
 ```
 
-### Updating Events
-```javascript
-import { updateEvent } from './firebase/eventService';
+## 📱 Screenshots
 
-const updated = await updateEvent(eventId, eventData, newImageFile);
+### Homepage
+Beautiful landing page with hero carousel and feature highlights.
+
+### Calendar View  
+Interactive calendar with event filtering and category-based color coding.
+
+### Admin Dashboard
+Comprehensive admin interface with statistics and management tools.
+
+### Event Gallery
+Elegant photo gallery with lightbox functionality and mobile optimization.
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary Green**: `#1E8449` - Main brand color
+- **Secondary Yellow**: `#F1C40F` - Accent color  
+- **Neutral Grays**: Various shades for text and backgrounds
+- **Semantic Colors**: Success, warning, and error states
+
+### Typography
+- **Headings**: Serif fonts for elegance
+- **Body Text**: Sans-serif for readability
+- **Responsive**: Fluid typography scaling
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/cem_events
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Server
+PORT=5000
+NODE_ENV=development
+```
+
+### Admin Credentials
+Default admin login (change in production):
+- **Username**: `admin`
+- **Password**: `admin123`
+
+## 🚀 Deployment
+
+### Development
+```bash
+npm run dev
+```
+
+### Production Build
+```bash
+npm run build
+npm start
+```
+
+### Docker (Optional)
+```bash
+docker build -t cem-events .
+docker run -p 5000:5000 cem-events
 ```
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Commit your changes**
+   ```bash
+   git commit -m 'Add amazing feature'
+   ```
+4. **Push to the branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
+
+### Development Guidelines
+- Follow React best practices and hooks patterns
+- Use Tailwind CSS for styling consistency
+- Write descriptive commit messages
+- Test features thoroughly before submitting PR
+- Update documentation for new features
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
-- Firebase for backend infrastructure
-- Tailwind CSS for the design system
-- Framer Motion for animations
-- Lucide for beautiful icons
-- The React community for excellent libraries
+- **Jaffna College of Education** - For providing the requirements and feedback
+- **React Community** - For excellent libraries and documentation
+- **Tailwind CSS** - For the amazing utility-first CSS framework
+- **Cloudinary** - For reliable image storage and optimization
+- **MongoDB** - For flexible document database
+
+## 📞 Support
+
+For support or questions:
+- **Email**: support@jaffnacollege.edu
+- **Issues**: [GitHub Issues](https://github.com/Mufaris32/cem_event_management/issues)
+- **Documentation**: Check the code comments and this README
 
 ---
 
-## 🆘 Need Help?
+**Built with ❤️ for Jaffna College of Education**
 
-- Check `FIREBASE_SETUP.md` for Firebase configuration
-- Review the code comments for implementation details
-- Open an issue for bugs or feature requests
-- Check the browser console for debugging information
-
-**Built with ❤️ for educational institutions**
-#   c e m _ e v e n t _ m a n a g e m e n t  
- 
+*Last updated: September 2025*
