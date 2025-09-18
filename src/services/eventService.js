@@ -179,24 +179,74 @@ export const getAllEvents = async (options = {}) => {
 };
 
 /**
- * Get upcoming events
+ * Get upcoming events (events that haven't started yet)
  * @param {Object} options - Query options
  * @returns {Promise<Array>} - Upcoming events
  */
 export const getUpcomingEvents = async (options = {}) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    // Get all events first, then filter by date+time
     const queryOptions = {
       ...options,
-      startDate: today,
       sortBy: 'date',
-      sortOrder: 'asc'
+      sortOrder: 'asc',
+      limit: 1000 // Get more events to filter properly
     };
 
     const result = await getAllEvents(queryOptions);
-    return result.events;
+    
+    // Helper function to parse event date and time
+    const getEventDateTime = (event) => {
+      const eventDate = new Date(event.date);
+      
+      if (event.time) {
+        // Parse time (assuming format like "2:30 PM" or "14:30")
+        let timeStr = event.time.toString().trim();
+        let hours = 0;
+        let minutes = 0;
+        
+        if (timeStr.includes(':')) {
+          const isAM_PM = /AM|PM/i.test(timeStr);
+          
+          if (isAM_PM) {
+            // 12-hour format (e.g., "2:30 PM")
+            const [timePart, period] = timeStr.split(/\s+(AM|PM)/i);
+            const [hoursStr, minutesStr] = timePart.split(':');
+            
+            hours = parseInt(hoursStr, 10) || 0;
+            minutes = parseInt(minutesStr, 10) || 0;
+            
+            // Convert to 24-hour format
+            if (period.toUpperCase() === 'PM' && hours !== 12) {
+              hours += 12;
+            } else if (period.toUpperCase() === 'AM' && hours === 12) {
+              hours = 0;
+            }
+          } else {
+            // 24-hour format (e.g., "14:30")
+            const [hoursStr, minutesStr] = timeStr.split(':');
+            hours = parseInt(hoursStr, 10) || 0;
+            minutes = parseInt(minutesStr, 10) || 0;
+          }
+        }
+        
+        eventDate.setHours(hours, minutes, 0, 0);
+      } else {
+        // If no time specified, assume it starts at beginning of day
+        eventDate.setHours(0, 0, 0, 0);
+      }
+      
+      return eventDate;
+    };
+
+    // Filter events that haven't started yet
+    const now = new Date();
+    const upcomingEvents = result.events.filter(event => {
+      const eventDateTime = getEventDateTime(event);
+      return eventDateTime >= now;
+    });
+
+    return upcomingEvents;
   } catch (error) {
     console.error('Error fetching upcoming events:', error);
     throw new Error('Failed to fetch upcoming events');
@@ -204,24 +254,74 @@ export const getUpcomingEvents = async (options = {}) => {
 };
 
 /**
- * Get past events
+ * Get past events (events that have passed their start time)
  * @param {Object} options - Query options
  * @returns {Promise<Array>} - Past events
  */
 export const getPastEvents = async (options = {}) => {
   try {
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-
+    // Get all events first, then filter by date+time
     const queryOptions = {
       ...options,
-      endDate: today,
       sortBy: 'date',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
+      limit: 1000 // Get more events to filter properly
     };
 
     const result = await getAllEvents(queryOptions);
-    return result.events;
+    
+    // Helper function to parse event date and time
+    const getEventDateTime = (event) => {
+      const eventDate = new Date(event.date);
+      
+      if (event.time) {
+        // Parse time (assuming format like "2:30 PM" or "14:30")
+        let timeStr = event.time.toString().trim();
+        let hours = 0;
+        let minutes = 0;
+        
+        if (timeStr.includes(':')) {
+          const isAM_PM = /AM|PM/i.test(timeStr);
+          
+          if (isAM_PM) {
+            // 12-hour format (e.g., "2:30 PM")
+            const [timePart, period] = timeStr.split(/\s+(AM|PM)/i);
+            const [hoursStr, minutesStr] = timePart.split(':');
+            
+            hours = parseInt(hoursStr, 10) || 0;
+            minutes = parseInt(minutesStr, 10) || 0;
+            
+            // Convert to 24-hour format
+            if (period.toUpperCase() === 'PM' && hours !== 12) {
+              hours += 12;
+            } else if (period.toUpperCase() === 'AM' && hours === 12) {
+              hours = 0;
+            }
+          } else {
+            // 24-hour format (e.g., "14:30")
+            const [hoursStr, minutesStr] = timeStr.split(':');
+            hours = parseInt(hoursStr, 10) || 0;
+            minutes = parseInt(minutesStr, 10) || 0;
+          }
+        }
+        
+        eventDate.setHours(hours, minutes, 0, 0);
+      } else {
+        // If no time specified, assume it starts at beginning of day
+        eventDate.setHours(0, 0, 0, 0);
+      }
+      
+      return eventDate;
+    };
+
+    // Filter events that have passed their start time
+    const now = new Date();
+    const pastEvents = result.events.filter(event => {
+      const eventDateTime = getEventDateTime(event);
+      return eventDateTime < now;
+    });
+
+    return pastEvents;
   } catch (error) {
     console.error('Error fetching past events:', error);
     throw new Error('Failed to fetch past events');

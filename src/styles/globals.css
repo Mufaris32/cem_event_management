@@ -546,6 +546,20 @@ body.transitioning .fc-tooltip {
   overflow: hidden;
 }
 
+/* Hide calendar scrollbars */
+.calendar-container .fc-scroller {
+  overflow: hidden !important;
+}
+
+.calendar-container .fc-scroller::-webkit-scrollbar {
+  display: none !important;
+}
+
+.calendar-container .fc {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
 /* Responsive calendar */
 @media (max-width: 768px) {
   .calendar-container .fc-event {

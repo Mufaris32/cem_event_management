@@ -50,12 +50,26 @@ export const uploadImage = async (fileData, folder = 'events') => {
  */
 export const uploadMultipleImages = async (fileDataArray, folder = 'events') => {
   try {
-    const uploadPromises = fileDataArray.map(fileData => uploadImage(fileData, folder));
+    console.log(`📸 Starting upload of ${fileDataArray.length} images to folder: ${folder}`);
+    
+    const uploadPromises = fileDataArray.map(async (fileData, index) => {
+      try {
+        console.log(`🔄 Uploading image ${index + 1}/${fileDataArray.length}...`);
+        const result = await uploadImage(fileData, folder);
+        console.log(`✅ Image ${index + 1} uploaded successfully: ${result.url}`);
+        return result;
+      } catch (error) {
+        console.error(`❌ Failed to upload image ${index + 1}:`, error.message);
+        throw error;
+      }
+    });
+    
     const results = await Promise.all(uploadPromises);
+    console.log(`🎉 All ${results.length} images uploaded successfully!`);
     return results;
   } catch (error) {
-    console.error('Error uploading multiple images:', error);
-    throw new Error('Failed to upload images');
+    console.error('❌ Error uploading multiple images:', error);
+    throw new Error(`Failed to upload images: ${error.message}`);
   }
 };
 

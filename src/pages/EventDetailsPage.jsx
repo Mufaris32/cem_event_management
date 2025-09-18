@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Calendar, 
   Clock, 
@@ -12,10 +12,14 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Camera,
+  Settings
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import EventGalleryManager from '../components/EventGalleryManager';
 import { getEventById } from '../services/eventServiceClient';
+import { isEventUpcoming, getEventDateTime } from '../utils/eventUtils';
 
 export default function EventDetailsPage() {
   const { id } = useParams();
@@ -98,24 +102,7 @@ export default function EventDetailsPage() {
   const generateGoogleCalendarUrl = () => {
     if (!event) return '';
 
-    const startDate = new Date(event.date);
-    // Set event time if available, otherwise default to 10:00 AM
-    if (event.time) {
-      const [time, period] = event.time.split(' ');
-      const [hours, minutes] = time.split(':');
-      let hour24 = parseInt(hours);
-      
-      if (period?.toLowerCase() === 'pm' && hour24 !== 12) {
-        hour24 += 12;
-      } else if (period?.toLowerCase() === 'am' && hour24 === 12) {
-        hour24 = 0;
-      }
-      
-      startDate.setHours(hour24, parseInt(minutes) || 0, 0, 0);
-    } else {
-      startDate.setHours(10, 0, 0, 0);
-    }
-
+    const startDate = getEventDateTime(event);
     // End time: 2 hours after start time
     const endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000));
 
@@ -184,7 +171,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const isUpcoming = new Date(event.date) > new Date();
+  const isUpcoming = isEventUpcoming(event);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-college-accent/20 via-white to-college-accent/10">
@@ -368,6 +355,36 @@ export default function EventDetailsPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Event Gallery Section - Only for Past Events */}
+            {!isUpcoming && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
+              >
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-college-primary/10 rounded-lg flex items-center justify-center">
+                      <Camera className="w-5 h-5 text-college-primary" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 font-serif">Event Photos</h2>
+                      <p className="text-gray-600">Photos from this past event</p>
+                    </div>
+                  </div>
+
+                  {/* Always show gallery for past events */}
+                  <EventGalleryManager 
+                    eventId={id} 
+                    eventTitle={event.title}
+                    isAdmin={false}
+                    key={`gallery-${id}`} // Force re-render when event changes
+                  />
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar */}

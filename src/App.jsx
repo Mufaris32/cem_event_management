@@ -12,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTopButton from './components/ScrollToTopButton';
+import APIDebugPanel from './components/APIDebugPanel';
 import NotFound from './pages/NotFound';
 
 // Component to handle route changes and cleanup
@@ -65,6 +66,7 @@ function App() {
       </Routes>
       <Footer />
       <ScrollToTopButton />
+      <APIDebugPanel />
     </Router>
   );
 }

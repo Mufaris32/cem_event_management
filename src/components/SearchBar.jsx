@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 
 export default function SearchBar({ onSearch, className = '', placeholder = "Search events..." }) {
   const [query, setQuery] = useState('');
+
+  // Debounce search to prevent excessive API calls
+  const debouncedSearch = useCallback(
+    (() => {
+      let timeoutId;
+      return (searchQuery) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          onSearch(searchQuery);
+        }, 300); // 300ms delay
+      };
+    })(),
+    [onSearch]
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,8 +31,8 @@ export default function SearchBar({ onSearch, className = '', placeholder = "Sea
   const handleChange = (e) => {
     const value = e.target.value;
     setQuery(value);
-    // Real-time search
-    onSearch(value);
+    // Use debounced search for real-time search
+    debouncedSearch(value);
   };
 
   return (

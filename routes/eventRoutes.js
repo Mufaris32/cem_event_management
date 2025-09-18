@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 import {
   createEvent,
   getAllEvents,
@@ -12,8 +13,27 @@ import {
   searchEvents,
   getEventStatistics
 } from '../src/services/eventService.js';
+import { uploadMultipleImages, deleteImage } from '../src/services/imageServiceServer.js';
+import Event from '../src/models/Event.js';
 
 const router = express.Router();
+
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Check file type
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  },
+});
 
 /**
  * Get all events with filtering and pagination
@@ -22,9 +42,13 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const result = await getAllEvents(req.query);
+    
+    // Extract events array from the result
+    const events = result.events || result;
+    
     res.status(200).json({
       success: true,
-      data: result
+      data: events
     });
   } catch (error) {
     console.error('Get events error:', error);
@@ -283,6 +307,274 @@ router.delete('/:id', async (req, res) => {
     res.status(error.message === 'Event not found' ? 404 : 500).json({
       success: false,
       message: error.message
+    });
+  }
+});
+
+/**
+ * Get event gallery images
+ * GET /api/events/:id/gallery
+ */
+router.get('/:id/gallery', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).select('galleryImages title');
+    
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Gallery images retrieved successfully',
+      galleryImages: event.galleryImages || [],
+      eventTitle: event.title
+    });
+  } catch (error) {
+    console.error('Get gallery images error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch gallery images',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Upload images to event gallery
+ * POST /api/events/:id/gallery
+ */
+router.post('/:id/gallery', upload.array('images', 10), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No images provided'
+      });
+    }
+
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    try {
+      // Debug: Check Cloudinary configuration
+      console.log('🔍 Cloudinary config check:', {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing',
+        api_key: process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing'
+      });
+
+      // Convert multer files to base64 for Cloudinary
+      const imagePromises = req.files.map(async (file, index) => {
+        const base64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+        const caption = req.body[`caption_${index}`] || '';
+        
+        console.log(`📸 Uploading image ${index + 1}/${req.files.length} to Cloudinary...`);
+        
+        // Upload to Cloudinary with event-specific folder
+        const uploadResult = await uploadMultipleImages([base64], `events/${event.title.replace(/[^a-zA-Z0-9]/g, '_')}_${event._id}/gallery`);
+        
+        console.log(`✅ Image ${index + 1} uploaded successfully:`, uploadResult[0].url);
+        
+        return {
+          url: uploadResult[0].url,
+          publicId: uploadResult[0].publicId,
+          caption: caption,
+          uploadedAt: new Date(),
+          uploadedBy: 'admin'
+        };
+      });
+
+      const galleryImages = await Promise.all(imagePromises);
+
+      // Add gallery images to event
+      event.galleryImages = [...(event.galleryImages || []), ...galleryImages];
+      await event.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Gallery images uploaded successfully',
+        galleryImages: galleryImages
+      });
+    } catch (cloudinaryError) {
+      console.error('Cloudinary upload failed:', cloudinaryError);
+      
+      // Fallback to mock images if Cloudinary fails
+      const mockResults = req.files.map((file, index) => ({
+        url: `https://via.placeholder.com/800x600/1B4D3E/FFFFFF?text=Gallery+Image+${index + 1}`,
+        publicId: `mock_gallery_${Date.now()}_${index}`,
+        caption: req.body[`caption_${index}`] || '',
+        uploadedAt: new Date(),
+        uploadedBy: 'admin'
+      }));
+
+      // Add mock gallery images to event
+      event.galleryImages = [...(event.galleryImages || []), ...mockResults];
+      await event.save();
+
+      res.status(200).json({
+        success: true,
+        message: 'Gallery images uploaded using fallback service (Cloudinary failed)',
+        galleryImages: mockResults,
+        warning: 'Cloudinary upload failed, using placeholder images'
+      });
+    }
+  } catch (error) {
+    console.error('Upload gallery images error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload gallery images',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Delete gallery image
+ * DELETE /api/events/:id/gallery/:imageId
+ */
+router.delete('/:id/gallery/:imageId', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    const imageIndex = event.galleryImages.findIndex(
+      img => img._id.toString() === req.params.imageId || img.publicId === req.params.imageId
+    );
+
+    if (imageIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Gallery image not found'
+      });
+    }
+
+    const imageToDelete = event.galleryImages[imageIndex];
+
+    try {
+      // Delete from Cloudinary if not a mock image
+      if (!imageToDelete.publicId.startsWith('mock_')) {
+        await deleteImage(imageToDelete.publicId);
+      }
+    } catch (cloudinaryError) {
+      console.warn('Failed to delete from Cloudinary:', cloudinaryError);
+      // Continue with database deletion even if Cloudinary fails
+    }
+
+    // Remove from event
+    event.galleryImages.splice(imageIndex, 1);
+    await event.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Gallery image deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete gallery image error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete gallery image',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Update gallery image caption
+ * PATCH /api/events/:id/gallery/:imageId
+ */
+router.patch('/:id/gallery/:imageId', async (req, res) => {
+  try {
+    const { caption } = req.body;
+    
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    const imageIndex = event.galleryImages.findIndex(
+      img => img._id.toString() === req.params.imageId || img.publicId === req.params.imageId
+    );
+
+    if (imageIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Gallery image not found'
+      });
+    }
+
+    // Update caption
+    event.galleryImages[imageIndex].caption = caption || '';
+    await event.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Gallery image caption updated successfully',
+      image: event.galleryImages[imageIndex]
+    });
+  } catch (error) {
+    console.error('Update gallery image caption error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update image caption',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Get gallery images for multiple events
+ * POST /api/events/galleries/multiple
+ */
+router.post('/galleries/multiple', async (req, res) => {
+  try {
+    const { eventIds } = req.body;
+    
+    if (!eventIds || !Array.isArray(eventIds)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Event IDs array is required'
+      });
+    }
+
+    const events = await Event.find({ 
+      _id: { $in: eventIds } 
+    }).select('_id title galleryImages');
+
+    const eventGalleries = {};
+    events.forEach(event => {
+      eventGalleries[event._id.toString()] = {
+        title: event.title,
+        galleryImages: event.galleryImages || []
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Event galleries retrieved successfully',
+      eventGalleries
+    });
+  } catch (error) {
+    console.error('Get multiple event galleries error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch event galleries',
+      error: error.message
     });
   }
 });
