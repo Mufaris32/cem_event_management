@@ -421,7 +421,7 @@ const EventsPage = () => {
                               to={`/events/${event._id || event.id}`}
                               className="inline-flex items-center gap-2 px-6 py-2 bg-college-primary text-white rounded-xl hover:bg-college-primary/90 transition-colors font-medium"
                             >
-                              {isPastEvent && galleryImages.length > 0 ? 'View Gallery' : 'View Details'}
+                              View Details
                               <ChevronRight className="w-4 h-4" />
                             </Link>
                           </div>
