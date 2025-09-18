@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Calendar, 
   Clock, 
@@ -28,7 +28,6 @@ export default function EventDetailsPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     loadEvent();
@@ -357,71 +356,35 @@ export default function EventDetailsPage() {
               </div>
             </motion.div>
 
-            {/* Event Gallery Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
-            >
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
+            {/* Event Gallery Section - Only for Past Events */}
+            {!isUpcoming && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100"
+              >
+                <div className="p-8">
+                  <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 bg-college-primary/10 rounded-lg flex items-center justify-center">
                       <Camera className="w-5 h-5 text-college-primary" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900 font-serif">Event Photos</h2>
-                      <p className="text-gray-600">
-                        {!isUpcoming ? 'Photos from this past event' : 'Photos will be available after the event'}
-                      </p>
+                      <p className="text-gray-600">Photos from this past event</p>
                     </div>
                   </div>
-                  
-                  {/* Toggle Gallery View Button */}
-                  {!isUpcoming && (
-                    <button
-                      onClick={() => setShowGallery(!showGallery)}
-                      className="flex items-center gap-2 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                    >
-                      <Camera className="w-4 h-4" />
-                      {showGallery ? 'Hide Photos' : 'View Photos'}
-                    </button>
-                  )}
+
+                  {/* Always show gallery for past events */}
+                  <EventGalleryManager 
+                    eventId={id} 
+                    eventTitle={event.title}
+                    isAdmin={false}
+                    key={`gallery-${id}`} // Force re-render when event changes
+                  />
                 </div>
-
-                <AnimatePresence>
-                  {showGallery && !isUpcoming && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <EventGalleryManager 
-                        eventId={id} 
-                        eventTitle={event.title}
-                        isAdmin={false}
-                        key={`gallery-${id}`} // Force re-render when event changes
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {!showGallery && (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
-                    <Camera className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 font-medium mb-2">Event Photo Gallery</p>
-                    <p className="text-gray-400 text-sm">
-                      {!isUpcoming 
-                        ? 'Click "View Photos" to see photos from this event' 
-                        : 'Photos will be available after the event concludes'
-                      }
-                    </p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar */}
