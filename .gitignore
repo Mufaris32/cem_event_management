@@ -4,6 +4,7 @@ node_modules
 .env
 .env.local
 .env.test
+.env.production
 
 # Build outputs
 dist/
@@ -12,7 +13,36 @@ build/
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+
+# Cache directories
+.cache/
+.npm/
+.yarn/
