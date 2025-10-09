@@ -33,6 +33,7 @@ export default function EventGalleryManager({ eventId, eventTitle, isAdmin = fal
   const [editingCaption, setEditingCaption] = useState(null);
   const [tempCaption, setTempCaption] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const loadGalleryImages = useCallback(async () => {
     if (!eventId) return;
@@ -237,11 +238,14 @@ export default function EventGalleryManager({ eventId, eventTitle, isAdmin = fal
                 transition={{ delay: index * 0.1 }}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300"
               >
-                <div className="relative aspect-square">
+                <div 
+                  className="relative aspect-square cursor-pointer" 
+                  onClick={() => setSelectedImage(image.url)}
+                >
                   <LazyImage
                     src={image.url}
                     alt={image.caption || `Gallery image ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                       console.error('🖼️ Image failed to load:', image.url);
                       e.target.src = 'https://via.placeholder.com/400x400/e5e7eb/9ca3af?text=Image+Not+Found';
@@ -252,14 +256,20 @@ export default function EventGalleryManager({ eventId, eventTitle, isAdmin = fal
                   {isAdmin && (
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
                       <button
-                        onClick={() => startEditingCaption(image)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditingCaption(image);
+                        }}
                         className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
                         title="Edit caption"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => setDeleteConfirm(image)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteConfirm(image);
+                        }}
                         className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
                         title="Delete image"
                       >
@@ -483,6 +493,13 @@ export default function EventGalleryManager({ eventId, eventTitle, isAdmin = fal
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Image View Modal */}
+      <ImageView 
+        image={selectedImage}
+        isOpen={!!selectedImage}
+        onClose={() => setSelectedImage(null)}
+      />
     </div>
   );
 }
