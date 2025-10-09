@@ -323,6 +323,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Check the browser console for debugging information
 
 **Built with ❤️ for educational institutions**
-#   c e m _ e v e n t _ m a n a g e m e n t 
- 
- 
+#
