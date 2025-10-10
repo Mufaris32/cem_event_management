@@ -141,119 +141,133 @@ src/
    npm run build
    ```
 
-## 🎯 Page Features
+## 📁 Project Structure
 
-### 🏠 Landing Page (`/`)
-- Hero section with elegant typography
-- Feature highlights with icons
-- Call-to-action sections
-- Responsive image galleries
-
-### 📅 Calendar Page (`/calendar`)
-- Interactive FullCalendar with custom styling
-- Advanced filtering by category and search
-- Event click navigation
-- Mobile-optimized calendar view
-- Quick statistics cards
-
-### 🖼️ Gallery Page (`/gallery`)
-- Elegant masonry-style grid
-- Real-time search and filtering
-- Year and category filters
-- Hover effects with smooth transitions
-- Quick view modals for events
-
-### 📄 Event Details (`/events/:id`)
-- Comprehensive event information
-- Large hero images
-- Elegant typography and layout
-- Social sharing capabilities
-- Related events suggestions
-
-### 👨‍💼 Admin Dashboard (`/admin/dashboard`)
-- Modern admin interface with statistics
-- Event management with inline editing
-- Bulk operations and analytics
-- Image upload with preview
-- Real-time data updates
-
-## 🔒 Authentication & Security
-
-### Admin Authentication
-- Simple username/password system
-- Session management with localStorage
-- Protected routes for admin features
-- Logout functionality
-
-### Firebase Security
-- Firestore security rules for data protection
-- Storage rules for image uploads
-- Input validation and sanitization
-- XSS protection with React
-
-## 📱 Responsive Design
-
-### Breakpoints
-- **Mobile**: < 640px
-- **Tablet**: 640px - 1024px
-- **Desktop**: > 1024px
-
-### Mobile Optimizations
-- Touch-friendly buttons and navigation
-- Optimized image loading
-- Simplified layouts for small screens
-- Swipe gestures for modals
-
-## 🎨 Customization
-
-### Design System
-Update the color scheme in `tailwind.config.js`:
-```javascript
-colors: {
-  college: {
-    primary: '#1B4D3E',    // Dark green
-    secondary: '#FFD700',   // Gold
-    accent: '#E8F3E9',     // Light green
-    // Add your custom colors
-  }
-}
+```
+cem_event_management/
+├── 📁 src/                     # Frontend source code
+│   ├── 📁 components/          # Reusable React components
+│   │   ├── AdminEventForm.jsx  # Event creation/editing form
+│   │   ├── EventCard.jsx       # Event display card
+│   │   ├── Gallery.jsx         # Photo gallery component
+│   │   ├── LoadingSpinner.jsx  # Loading animation
+│   │   └── Navbar.jsx          # Navigation component
+│   ├── 📁 pages/               # Main application pages
+│   │   ├── AdminDashboard.jsx  # Admin management interface
+│   │   ├── CalendarPage.jsx    # Interactive calendar view
+│   │   ├── EventsPage.jsx      # Events listing page
+│   │   ├── GalleryPage.jsx     # Photo gallery page
+│   │   └── LandingPage.jsx     # Homepage
+│   ├── 📁 services/            # API service functions
+│   ├── 📁 styles/              # Global CSS styles
+│   └── 📁 utils/               # Utility functions
+├── 📁 routes/                  # Backend API routes
+├── 📁 models/                  # Database models
+├── 📁 config/                  # Configuration files
+├── server.js                   # Express server entry point
+├── vite.config.mjs            # Vite configuration
+└── package.json               # Project dependencies
 ```
 
-### Adding New Event Categories
-1. Update the categories array in components
-2. Add corresponding colors in the design system
-3. Update Firebase queries if needed
+## 👨‍💼 Admin Features
 
-### Custom Styling
-- Modify `src/styles/globals.css` for global styles
-- Use Tailwind classes for component-specific styling
-- Add custom animations with Framer Motion
+### Dashboard Overview
+- **Event Statistics**: Total, upcoming, and past events count
+- **Quick Actions**: Add new event, manage carousel
+- **Recent Events**: List of recently created events with management options
 
-## 🚀 Performance Optimization
+### Event Management
+- **Create Events**: Rich form with image upload and validation
+- **Edit Events**: Inline editing with real-time updates
+- **Delete Events**: Confirmation dialog for safe deletion
+- **Bulk Operations**: Manage multiple events efficiently
 
-- **Code Splitting**: Route-based lazy loading
-- **Image Optimization**: WebP format with fallbacks
-- **Caching**: Firebase caching for faster loads
-- **Bundle Analysis**: Webpack bundle analyzer integration
-- **SEO**: Meta tags and structured data
+### Gallery Management
+- **Photo Upload**: Drag-and-drop image upload for past events
+- **Image Organization**: Organize photos by event categories
+- **Photo Editing**: Basic editing tools and caption management
 
-## � Event Data Structure
+### Authentication
+- **Secure Login**: Admin authentication with session management
+- **Protected Routes**: Access control for admin-only features
+- **Auto Logout**: Session timeout for security
 
-```javascript
-{
-  id: "auto-generated",
-  title: "Event Name",
-  date: "YYYY-MM-DD",
-  time: "HH:MM", // optional
-  location: "Event Location", // optional
-  category: "Cultural|Sports|Workshop|Seminar|Conference|Competition",
-  shortDescription: "Brief description (max 150 chars)",
-  description: "Full event description",
-  imageUrl: "Firebase Storage URL",
-  createdAt: "Firestore Timestamp",
-  updatedAt: "Firestore Timestamp"
-}
+## 🔌 API Endpoints
+
+### Events
+```http
+GET    /api/events              # Get all events
+GET    /api/events/upcoming     # Get upcoming events
+GET    /api/events/past         # Get past events
+GET    /api/events/:id          # Get specific event
+POST   /api/events              # Create new event
+PUT    /api/events/:id          # Update event
+DELETE /api/events/:id          # Delete event
 ```
+
+### Gallery
+```http
+GET    /api/gallery/:eventId    # Get event photos
+POST   /api/gallery/:eventId    # Upload photos
+DELETE /api/gallery/:photoId    # Delete photo
+```
+
+### Carousel
+```http
+GET    /api/carousel             # Get carousel items
+POST   /api/carousel             # Create carousel item
+PUT    /api/carousel/:id         # Update carousel item
+DELETE /api/carousel/:id         # Delete carousel item
+```
+
+## 📱 Screenshots
+
+### Homepage
+Beautiful landing page with hero carousel and feature highlights.
+
+### Calendar View  
+Interactive calendar with event filtering and category-based color coding.
+
+### Admin Dashboard
+Comprehensive admin interface with statistics and management tools.
+
+### Event Gallery
+Elegant photo gallery with lightbox functionality and mobile optimization.
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary Green**: `#1E8449` - Main brand color
+- **Secondary Yellow**: `#F1C40F` - Accent color  
+- **Neutral Grays**: Various shades for text and backgrounds
+- **Semantic Colors**: Success, warning, and error states
+
+### Typography
+- **Headings**: Serif fonts for elegance
+- **Body Text**: Sans-serif for readability
+- **Responsive**: Fluid typography scaling
+
+## 🔧 Configuration
+
+### Environment Variables
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/cem_events
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Server
+PORT=5000
+NODE_ENV=development
+```
+
+### Admin Credentials
+Default admin login (change in production):
+- **Username**: `admin`
+- **Password**: `admin123`
 
 ## 🔄 Firebase Operations
 
@@ -309,5 +323,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Check the browser console for debugging information
 
 **Built with ❤️ for educational institutions**
-#   c e m _ e v e n t _ m a n a g e m e n t  
- 
+#
