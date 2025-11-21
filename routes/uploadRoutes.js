@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { uploadImage, uploadMultipleImages, deleteImage, getImagesFromFolder } from '../src/services/imageServiceServer.js';
+import { generatePlaceholderImage } from '../src/utils/placeholderImage.js';
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.post('/images', upload.array('images', 5), async (req, res) => {
       
       // Fallback to mock images if Cloudinary fails
       const mockResults = req.files.map((file, index) => ({
-        url: `https://via.placeholder.com/800x600/1B4D3E/FFFFFF?text=Upload+Failed+${index + 1}`,
+        url: generatePlaceholderImage(800, 600, `Upload Failed ${index + 1}`, '1B4D3E', 'FFFFFF'),
         publicId: `mock_image_${Date.now()}_${index}`,
         width: 800,
         height: 600,
@@ -104,7 +105,7 @@ router.post('/image', upload.single('image'), async (req, res) => {
       
       // Fallback to mock image if Cloudinary fails
       const mockResult = {
-        url: `https://via.placeholder.com/800x600/1B4D3E/FFFFFF?text=Upload+Failed`,
+        url: generatePlaceholderImage(800, 600, 'Upload Failed', '1B4D3E', 'FFFFFF'),
         publicId: `mock_image_${Date.now()}`,
         width: 800,
         height: 600,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Camera, User, Home, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import collegeLogo from '../pages/assets/icon.jpg';
+import collegeLogo from '../pages/assets/icon.png';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

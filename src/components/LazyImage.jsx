@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import placeholders from '../utils/placeholderImage';
 
 const LazyImage = ({ 
   src, 
   alt, 
   className = '', 
   onClick = null,
-  placeholder = 'https://via.placeholder.com/300x300/e5e5e5/999999?text=Loading...'
+  placeholder = placeholders.loading
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
@@ -48,7 +49,7 @@ const LazyImage = ({
   };
 
   const imageSrc = hasError 
-    ? 'https://via.placeholder.com/300x300/e5e5e5/999999?text=Image+Not+Found'
+    ? placeholders.loading
     : (isInView ? src : placeholder);
 
   return (

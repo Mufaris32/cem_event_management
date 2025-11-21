@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
+import placeholders from '../utils/placeholderImage';
 
 const Gallery = ({ 
   images = [], 
@@ -172,7 +173,7 @@ const Gallery = ({
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/400x400/e5e7eb/9ca3af?text=Image+Not+Found';
+                  e.target.src = placeholders.galleryImage;
                 }}
               />
               
@@ -273,7 +274,7 @@ const Gallery = ({
                   className="max-w-full max-h-full object-contain"
                   onLoad={handleImageLoad}
                   onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/800x600/e5e7eb/9ca3af?text=Image+Not+Found';
+                    e.target.src = placeholders.galleryImage;
                     setIsImageLoading(false);
                   }}
                 />

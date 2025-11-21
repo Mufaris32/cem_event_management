@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Calendar, MapPin, Clock, Tag, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import placeholders from '../utils/placeholderImage';
 
 const EventModal = ({ event, isOpen, onClose }) => {
   if (!event) return null;
@@ -48,7 +49,7 @@ const EventModal = ({ event, isOpen, onClose }) => {
             {/* Header */}
             <div className="relative">
               <img
-                src={event.images?.[0]?.url || event.imageUrl || 'https://via.placeholder.com/800x400?text=No+Image'}
+                src={event.images?.[0]?.url || event.imageUrl || placeholders.noImage}
                 alt={event.title}
                 className="w-full h-64 object-cover"
               />

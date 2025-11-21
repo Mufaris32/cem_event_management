@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Calendar, Camera, User, Menu, X, Home, List } from 'lucide-react';
 import { scrollToTop } from '../utils/scrollToTop';
-import collegeLogo from '../pages/assets/icon.jpg';
+import collegeLogo from '../pages/assets/icon.png';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,7 +40,7 @@ export default function Navbar() {
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
-            <span className="hidden sm:block text-[#186A3B]">JCoE Event Hub</span>
+            <span className="hidden sm:block text-[#186A3B]">JNCoE Event Hub</span>
           </Link>
 
           {/* Desktop Navigation */}

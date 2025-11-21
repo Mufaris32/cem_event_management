@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, MapPin, Clock, Eye, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { scrollToTop } from '../utils/scrollToTop';
+import placeholders from '../utils/placeholderImage';
 
 const EventCard = ({ event, onClick, showViewMore = true }) => {
   const formatDate = (dateString) => {
@@ -43,12 +44,12 @@ const EventCard = ({ event, onClick, showViewMore = true }) => {
       {/* Image Section */}
       <div className="relative overflow-hidden h-64">
         <motion.img
-          src={event.images?.[0]?.url || event.imageUrl || 'https://via.placeholder.com/800x400/1B4D3E/FFFFFF?text=Event+Image'}
+          src={event.images?.[0]?.url || event.imageUrl || placeholders.eventImage}
           alt={event.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           whileHover={{ scale: 1.05 }}
           onError={(e) => {
-            e.target.src = 'https://via.placeholder.com/800x400/1B4D3E/FFFFFF?text=Event+Image';
+            e.target.src = placeholders.eventImage;
           }}
         />
         

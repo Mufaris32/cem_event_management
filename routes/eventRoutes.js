@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import { generatePlaceholderImage } from '../src/utils/placeholderImage.js';
 import {
   createEvent,
   getAllEvents,
@@ -268,7 +269,11 @@ router.put('/:id', async (req, res) => {
 
     // Add new images if provided
     if (newImages && newImages.length > 0) {
-      event.images = [...(event.images || []), ...newImages];
+      // Remove any placeholder images before adding real images
+      const filteredImages = (event.images || []).filter(img => 
+        !img.publicId.startsWith('placeholder_')
+      );
+      event.images = [...filteredImages, ...newImages];
       await event.save();
     }
     
@@ -404,7 +409,7 @@ router.post('/:id/gallery', upload.array('images', 10), async (req, res) => {
       
       // Fallback to mock images if Cloudinary fails
       const mockResults = req.files.map((file, index) => ({
-        url: `https://via.placeholder.com/800x600/1B4D3E/FFFFFF?text=Gallery+Image+${index + 1}`,
+        url: generatePlaceholderImage(800, 600, `Gallery Image ${index + 1}`, '1B4D3E', 'FFFFFF'),
         publicId: `mock_gallery_${Date.now()}_${index}`,
         caption: req.body[`caption_${index}`] || '',
         uploadedAt: new Date(),

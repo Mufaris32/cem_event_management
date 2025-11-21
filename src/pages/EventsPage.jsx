@@ -8,6 +8,7 @@ import LazyImage from '../components/LazyImage';
 import { getAllEvents } from '../services/eventServiceClient';
 import { useEventGallery } from '../hooks/useEventGallery';
 import { isEventPast } from '../utils/eventUtils';
+import placeholders from '../utils/placeholderImage';
 
 const EventsPage = () => {
   const [allEvents, setAllEvents] = useState([]);
@@ -341,7 +342,7 @@ const EventsPage = () => {
                               alt={event.title}
                               className="w-full h-48 object-cover rounded-xl"
                               onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/800x400/1B4D3E/FFFFFF?text=No+Image';
+                                e.target.src = placeholders.noImage;
                               }}
                             />
                           ) : (

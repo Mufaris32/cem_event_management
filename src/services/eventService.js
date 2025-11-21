@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Event from '../models/Event.js';
 import { uploadImage, uploadMultipleImages, deleteImage } from './imageServiceServer.js';
+import { generatePlaceholderImage } from '../utils/placeholderImage.js';
 
 // Helper function to handle multiple image deletions
 const deleteMultipleImages = async (publicIds) => {
@@ -47,14 +48,15 @@ export const createEvent = async (eventData, imageFiles = []) => {
         images = [];
       }
     } else if (eventData.images && Array.isArray(eventData.images)) {
-      // Use provided images from eventData
-      images = eventData.images;
+      // Use provided images from eventData (could be empty array if images will be added later)
+      images = eventData.images.filter(img => img && img.url); // Filter out any invalid entries
     }
     
-    // Add a placeholder image if no images are provided at all
-    if (!images || images.length === 0) {
+    // Only add a placeholder if no images were provided AND it's not explicitly an empty array
+    // (empty array means images will be added later via update)
+    if (!images || (images.length === 0 && !eventData.images)) {
       images = [{
-        url: 'https://via.placeholder.com/800x400/1B4D3E/FFFFFF?text=Event+Image',
+        url: generatePlaceholderImage(800, 400, 'Event Image', '1B4D3E', 'FFFFFF'),
         publicId: `placeholder_${Date.now()}`,
         caption: 'Event placeholder image'
       }];

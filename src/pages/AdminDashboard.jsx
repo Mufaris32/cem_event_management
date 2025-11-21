@@ -21,6 +21,7 @@ import {
 import AdminEventForm from '../components/AdminEventForm';
 import EventGalleryManager from '../components/EventGalleryManager';
 import LoadingSpinner from '../components/LoadingSpinner';
+import placeholders from '../utils/placeholderImage';
 import { 
   getAllEvents, 
   deleteEvent, 
@@ -487,7 +488,7 @@ export default function AdminDashboard() {
                           <img
                             src={event.images && event.images.length > 0 
                               ? event.images[0].url 
-                              : 'https://via.placeholder.com/64x64?text=No+Image'}
+                              : placeholders.thumbnail}
                             alt={event.title}
                             className="w-12 h-12 object-cover rounded-lg"
                           />

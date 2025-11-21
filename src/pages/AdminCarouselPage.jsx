@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { carouselService } from '../services/carouselService';
+import { generatePlaceholderImage } from '../utils/placeholderImage';
 
 const AdminCarouselPage = () => {
   const navigate = useNavigate();
@@ -50,19 +51,19 @@ const AdminCarouselPage = () => {
         {
           id: '1',
           description: 'Annual Tech Conference 2025 - Embracing Innovation and Digital Transformation',
-          imageUrl: 'https://via.placeholder.com/800x600?text=Tech+Conference',
+          imageUrl: generatePlaceholderImage(800, 600, 'Tech Conference', '1B4D3E', 'FFFFFF'),
           order: 1
         },
         {
           id: '2',
           description: 'Cultural Night Celebration - Showcasing Diverse Talents and Traditions',
-          imageUrl: 'https://via.placeholder.com/800x600?text=Cultural+Night',
+          imageUrl: generatePlaceholderImage(800, 600, 'Cultural Night', '1B4D3E', 'FFFFFF'),
           order: 2
         },
         {
           id: '3',
           description: 'Sports Day Highlights - Athletic Excellence and Team Spirit',
-          imageUrl: 'https://via.placeholder.com/800x600?text=Sports+Day',
+          imageUrl: generatePlaceholderImage(800, 600, 'Sports Day', '1B4D3E', 'FFFFFF'),
           order: 3
         }
       ]);

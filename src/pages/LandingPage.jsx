@@ -4,6 +4,7 @@ import { Calendar, ArrowRight, Star, Users, Trophy, Camera, MapPin, Clock } from
 import { gsap } from 'gsap';
 import { getUpcomingEvents } from '../services/eventServiceClient';
 import { carouselService } from '../services/carouselService';
+import placeholders from '../utils/placeholderImage';
 
 // Import images
 import statsImage from './assets/Schedule-amico.png';
@@ -201,17 +202,35 @@ const LandingPage = () => {
     {
       icon: Calendar,
       title: 'Event Calendar',
-      description: 'View and manage all upcoming events in one place'
+      description: 'Stay organized and never miss an important event',
+      points: [
+        'Interactive calendar view with all upcoming events',
+        'Quick access to event details and locations',
+        'Set reminders for important dates',
+        'Filter events by category and date range'
+      ]
     },
     {
       icon: Camera,
       title: 'Photo Gallery',
-      description: 'Browse through beautiful moments from past events'
+      description: 'Relive memorable moments from past events',
+      points: [
+        'High-quality images from all college events',
+        'Organized by event categories and dates',
+        'Easy sharing with friends and family',
+        'Download your favorite event photos'
+      ]
     },
     {
       icon: Users,
       title: 'Easy Management',
-      description: 'Streamlined admin dashboard for event organization'
+      description: 'Powerful admin tools for seamless event organization',
+      points: [
+        'Intuitive dashboard for event creation',
+        'Upload and manage event images easily',
+        'Track attendance and generate reports',
+        'Real-time updates and notifications'
+      ]
     }
   ];
 
@@ -308,8 +327,8 @@ const LandingPage = () => {
               </div>
               
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-6 leading-tight">
-                Jaffna College of Education
-                <span className="block text-secondary-yellow-dark">Event Highlights</span>
+                Jaffna National College of Education Event
+                <span className="block text-secondary-yellow-dark"> Highlights</span>
               </h1>
               
               <p className="text-lg text-muted mb-8 leading-relaxed max-w-xl">
@@ -428,7 +447,7 @@ const LandingPage = () => {
                   {/* Event Image */}
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={event.images?.[0]?.url || event.imageUrl || 'https://via.placeholder.com/400x300?text=No+Image'}
+                      src={event.images?.[0]?.url || event.imageUrl || placeholders.noImage}
                       alt={event.title}
                       className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                     />
@@ -544,7 +563,7 @@ const LandingPage = () => {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className="card text-center hover:transform hover:scale-105 transition-all duration-300 p-6 lg:p-8"
+                className="card hover:transform hover:scale-105 transition-all duration-300 p-6 lg:p-8 flex flex-col"
                 onMouseEnter={(e) => {
                   gsap.to(e.target, {
                     y: -15,
@@ -564,12 +583,20 @@ const LandingPage = () => {
                   });
                 }}
               >
-                <div className="card-body">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-green to-primary-green-light rounded-xl flex items-center justify-center transform transition-transform duration-300 hover:rotate-12">
+                <div className="card-body flex flex-col items-center text-center">
+                  <div className="w-16 h-16 mb-4 bg-gradient-to-br from-primary-green to-primary-green-light rounded-xl flex items-center justify-center transform transition-transform duration-300 hover:rotate-12">
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted">{feature.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 min-h-[2rem] flex items-center">{feature.title}</h3>
+                  <p className="text-muted mb-4">{feature.description}</p>
+                  <ul className="text-left space-y-2 mt-2">
+                    {feature.points.map((point, pointIndex) => (
+                      <li key={pointIndex} className="text-sm text-gray-600 flex items-start">
+                        <span className="text-primary-green mr-2 mt-1">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             ))}
